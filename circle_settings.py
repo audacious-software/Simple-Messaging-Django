@@ -41,7 +41,7 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.security.SecurityMiddleware',
 )
 
-ROOT_URLCONF = 'simple_messaging.travis_urls'
+ROOT_URLCONF = 'simple_messaging.circle_urls'
 
 TEMPLATES = [
     {
@@ -64,8 +64,8 @@ WSGI_APPLICATION = 'pdk.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE':   'django.contrib.gis.db.backends.postgis',
-        'NAME':     'travisci',
-        'USER':     'postgres',
+        'NAME':     'circle_test',
+        'USER':     'root',
         'PASSWORD': '',
         'HOST':     'localhost',
         'PORT':     '',
