@@ -121,7 +121,7 @@ class IncomingMessage(models.Model):
     transmission_metadata = models.TextField(blank=True, null=True)
 
 class IncomingMessageMedia(models.Model):
-    message = models.ForeignKey(IncomingMessage, related_name='media')
+    message = models.ForeignKey(IncomingMessage, related_name='media', on_delete=models.CASCADE)
 
     index = models.IntegerField(default=0)
 
