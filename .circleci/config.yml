@@ -93,7 +93,7 @@ jobs:
             pylint simple_messaging
             bandit -r .      
       - save_cache:
-          key: venv-27-{{ .Branch }}-{{ checksum "/home/circleci/django/pdk/passive_data_kit/requirements.txt" }}
+          key: venv-27-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
           paths:
             - "/home/circleci/venv"
       - store_test_results:
