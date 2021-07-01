@@ -3,15 +3,21 @@
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
-from ...decorators import handle_lock, log_scheduled_event
+from quicksilver.decorators import handle_lock, handle_schedule, add_qs_arguments
 
+from ...decorators import log_scheduled_event
 from ...models import OutgoingMessage
 
 class Command(BaseCommand):
     help = 'Transmits unsent pending messages'
 
+    @add_qs_arguments
+    def add_arguments(self, parser):
+        pass
+
     @handle_lock
     @log_scheduled_event
+    @handle_schedule
     def handle(self, *args, **options):
         now = timezone.now()
 

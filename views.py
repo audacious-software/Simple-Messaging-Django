@@ -54,8 +54,9 @@ def incoming_twilio(request): # pylint: disable=too-many-branches,too-many-local
             now = timezone.now()
 
             destination = request.POST['To']
+            sender = request.POST['From']
 
-            incoming = IncomingMessage(recipient=destination)
+            incoming = IncomingMessage(recipient=destination, sender=sender)
             incoming.receive_date = now
             incoming.message = request.POST['Body'].strip()
             incoming.transmission_metadata = json.dumps(dict(request.POST), indent=2)
@@ -103,5 +104,16 @@ def incoming_twilio(request): # pylint: disable=too-many-branches,too-many-local
                         'content': file_bytes.getvalue(),
                         'mime-type': media.content_type
                     }
+
+            for app in settings.INSTALLED_APPS:
+                try:
+                    response_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                    response_module.process_incoming_message(incoming)
+                except ImportError:
+                    pass
+                except AttributeError:
+                    pass
+
 
     return HttpResponse(response, content_type='text/xml')

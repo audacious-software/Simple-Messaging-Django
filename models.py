@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import importlib
 import json
 import time
 import traceback
@@ -73,24 +74,47 @@ class OutgoingMessage(models.Model):
         if self.sent_date is not None:
             raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.')
 
+
         try:
+            processed = False
+            processed_metadata = {}
+
+            for app in settings.INSTALLED_APPS:
+                try:
+                    response_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                    metadata = response_module.process_outgoing_message(self)
+
+                    if metadata is not None:
+                        processed = True
+                        processed_metadata.update(metadata)
+                except ImportError:
+                    pass
+                except AttributeError:
+                    pass
+
             transmission_metadata = {}
 
             if self.transmission_metadata is not None and self.transmission_metadata.strip() != '':
                 transmission_metadata = json.loads(self.transmission_metadata)
 
-            client = Client(settings.SIMPLE_MESSAGING_TWILIO_CLIENT_ID, settings.SIMPLE_MESSAGING_TWILIO_AUTH_TOKEN)
-
-            if self.message.startswith('image:'):
-                twilio_message = client.messages.create(to=self.destination, from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, media_url=[self.message[6:]]) # pylint: disable=unsubscriptable-object
-
-                time.sleep(10)
+            if processed:
+                transmission_metadata.update(processed_metadata)
             else:
-                twilio_message = client.messages.create(to=self.destination, from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, body=self.fetch_message(transmission_metadata))
+                client = Client(settings.SIMPLE_MESSAGING_TWILIO_CLIENT_ID, settings.SIMPLE_MESSAGING_TWILIO_AUTH_TOKEN)
+
+                twilio_message = None
+
+                if self.message.startswith('image:'):
+                    twilio_message = client.messages.create(to=self.destination, from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, media_url=[self.message[6:]]) # pylint: disable=unsubscriptable-object
+
+                    time.sleep(10)
+                else:
+                    twilio_message = client.messages.create(to=self.destination, from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, body=self.fetch_message(transmission_metadata))
+
+                transmission_metadata['twilio_sid'] = twilio_message.sid
 
             self.sent_date = timezone.now()
-
-            transmission_metadata['twilio_sid'] = twilio_message.sid
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
@@ -112,6 +136,7 @@ class OutgoingMessage(models.Model):
             self.save()
 
 class IncomingMessage(models.Model):
+    sender = models.CharField(max_length=256)
     recipient = models.CharField(max_length=256)
 
     receive_date = models.DateTimeField()
