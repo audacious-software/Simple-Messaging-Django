@@ -74,6 +74,8 @@ class OutgoingMessage(models.Model):
         if self.sent_date is not None:
             raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.')
 
+        self.sent_date = timezone.now() # Saving early to avoid accidental duplicate sends.
+        self.save()
 
         try:
             processed = False
