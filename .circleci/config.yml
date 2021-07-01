@@ -39,6 +39,7 @@ jobs:
             django-admin.py startproject sm
             mv ../simple_messaging sm
             cd sm
+            git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
             python manage.py migrate
@@ -85,6 +86,7 @@ jobs:
             django-admin.py startproject sm
             mv ../simple_messaging sm
             cd sm
+            git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
             python manage.py migrate
