@@ -63,6 +63,8 @@ def incoming_twilio(request): # pylint: disable=too-many-branches,too-many-local
 
             incoming.save()
 
+            incoming.encrypt_sender()
+
             num_media = 0
 
             media_objects = {}

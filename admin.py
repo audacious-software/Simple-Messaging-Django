@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import json
 
+from django.conf import settings
 from django.contrib import admin
 
 from .models import OutgoingMessage, IncomingMessage, IncomingMessageMedia
@@ -29,14 +30,22 @@ reset_resend_messages.short_description = "Reset and resend selected messages"
 
 @admin.register(OutgoingMessage)
 class OutgoingMessageAdmin(admin.ModelAdmin):
-    list_display = ('destination', 'reference_id', 'send_date', 'sent_date', 'message', 'errored')
+    if hasattr(settings, 'SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES') and settings.SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES:
+        list_display = ('current_destination', 'reference_id', 'send_date', 'sent_date', 'message', 'errored')
+    else:
+        list_display = ('destination', 'reference_id', 'send_date', 'sent_date', 'message', 'errored')
+
     search_fields = ('destination', 'message', 'transmission_metadata',)
     list_filter = ('errored', 'send_date', 'sent_date',)
     actions = [reset_resend_messages]
 
 @admin.register(IncomingMessage)
 class IncomingMessageAdmin(admin.ModelAdmin):
-    list_display = ('sender', 'recipient', 'receive_date', 'message')
+    if hasattr(settings, 'SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES') and settings.SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES:
+        list_display = ('current_sender', 'recipient', 'receive_date', 'message')
+    else:
+        list_display = ('sender', 'recipient', 'receive_date', 'message')
+
     search_fields = ('sender', 'message',)
     list_filter = ('receive_date',)
 
