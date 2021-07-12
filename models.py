@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 
+import base64
 import importlib
 import json
 import time
@@ -9,11 +10,47 @@ import traceback
 
 import requests
 
+from nacl.secret import SecretBox
 from twilio.rest import Client
 
 from django.conf import settings
 from django.db import models
 from django.utils import timezone
+from django.utils.encoding import smart_str
+
+def decrypt_value(stored_text):
+    try:
+        key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
+
+        box = SecretBox(key)
+
+        ciphertext = base64.b64decode(stored_text.replace('secret:', '', 1))
+
+        cleartext = box.decrypt(ciphertext)
+
+        return smart_str(cleartext)
+
+    except AttributeError:
+        pass
+
+    return None
+
+def encrypt_value(cleartext):
+    try:
+        key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
+
+        box = SecretBox(key)
+
+        uft8_bytes = cleartext.encode('utf-8')
+
+        ciphertext = box.encrypt(uft8_bytes)
+
+        return 'secret:' + smart_str(base64.b64encode(ciphertext))
+
+    except AttributeError:
+        pass
+
+    return None
 
 class OutgoingMessage(models.Model):
     destination = models.CharField(max_length=256)
@@ -70,10 +107,36 @@ class OutgoingMessage(models.Model):
 
         return self.message
 
+    def current_destination(self):
+        if self.destination is not None and self.destination.startswith('secret:'):
+            return decrypt_value(self.destination)
+
+        return self.destination
+
+    def update_destination(self, new_destination, force=False):
+        if force is False and new_destination == self.current_destination():
+            return # Same as current - don't add
+
+        if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+            encrypted_dest = encrypt_value(new_destination)
+
+            print('NEW DEST: ' + new_destination)
+            print('ENC DEST: ' + encrypted_dest)
+
+            self.destination = encrypted_dest
+        else:
+            print('MISSING KEY 2')
+            self.destination = new_destination
+
+        self.save()
+
+    def encrypt_destination(self):
+        if self.destination.startswith('secret:') is False:
+            self.update_destination(self.destination, force=True)
+
     def transmit(self):
         if self.sent_date is not None:
             raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.')
-
 
         try:
             processed = False
@@ -106,11 +169,11 @@ class OutgoingMessage(models.Model):
                 twilio_message = None
 
                 if self.message.startswith('image:'):
-                    twilio_message = client.messages.create(to=self.destination, from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, media_url=[self.message[6:]]) # pylint: disable=unsubscriptable-object
+                    twilio_message = client.messages.create(to=self.current_destination(), from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, media_url=[self.message[6:]]) # pylint: disable=unsubscriptable-object
 
                     time.sleep(10)
                 else:
-                    twilio_message = client.messages.create(to=self.destination, from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, body=self.fetch_message(transmission_metadata))
+                    twilio_message = client.messages.create(to=self.current_destination(), from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, body=self.fetch_message(transmission_metadata))
 
                 transmission_metadata['twilio_sid'] = twilio_message.sid
 
@@ -144,6 +207,29 @@ class IncomingMessage(models.Model):
     message = models.TextField(max_length=1024)
 
     transmission_metadata = models.TextField(blank=True, null=True)
+
+    def current_sender(self):
+        if self.sender is not None and self.sender.startswith('secret:'):
+            return decrypt_value(self.sender)
+
+        return self.sender
+
+    def update_sender(self, new_sender, force=False):
+        if force is False and new_sender == self.current_sender():
+            return # Same as current - don't add
+
+        if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+            encrypted_sender = encrypt_value(new_sender)
+
+            self.sender = encrypted_sender
+        else:
+            self.sender = new_sender
+
+        self.save()
+
+    def encrypt_sender(self):
+        if self.sender.startswith('secret:') is False:
+            self.update_sender(self.sender, force=True)
 
 class IncomingMessageMedia(models.Model):
     message = models.ForeignKey(IncomingMessage, related_name='media', on_delete=models.CASCADE)
