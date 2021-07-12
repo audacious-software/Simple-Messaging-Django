@@ -120,12 +120,8 @@ class OutgoingMessage(models.Model):
         if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
             encrypted_dest = encrypt_value(new_destination)
 
-            print('NEW DEST: ' + new_destination)
-            print('ENC DEST: ' + encrypted_dest)
-
             self.destination = encrypted_dest
         else:
-            print('MISSING KEY 2')
             self.destination = new_destination
 
         self.save()
