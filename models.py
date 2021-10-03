@@ -5,13 +5,11 @@ from __future__ import unicode_literals
 import base64
 import importlib
 import json
-import time
 import traceback
 
 import requests
 
 from nacl.secret import SecretBox
-from twilio.rest import Client
 
 from django.conf import settings
 from django.db import models
@@ -142,18 +140,24 @@ class OutgoingMessage(models.Model):
             processed_metadata = {}
 
             for app in settings.INSTALLED_APPS:
-                try:
-                    response_module = importlib.import_module('.simple_messaging_api', package=app)
+                if processed is False:
+                    try:
+                        print('TRY 0: ' + app)
+                        response_module = importlib.import_module('.simple_messaging_api', package=app)
 
-                    metadata = response_module.process_outgoing_message(self)
+                        print('TRY 1: ' + app)
 
-                    if metadata is not None:
-                        processed = True
-                        processed_metadata.update(metadata)
-                except ImportError:
-                    pass
-                except AttributeError:
-                    pass
+                        metadata = response_module.process_outgoing_message(self)
+
+                        print('TRY 2: ' + app + ' -- ' + str(metadata))
+
+                        if metadata is not None:
+                            processed = True
+                            processed_metadata.update(metadata)
+                    except ImportError:
+                        traceback.print_exc() #pass
+                    except AttributeError:
+                        traceback.print_exc() #pass
 
             transmission_metadata = {}
 
@@ -162,25 +166,17 @@ class OutgoingMessage(models.Model):
 
             if processed:
                 transmission_metadata.update(processed_metadata)
+
+                self.sent_date = timezone.now()
+
+                self.errored = False
             else:
-                client = Client(settings.SIMPLE_MESSAGING_TWILIO_CLIENT_ID, settings.SIMPLE_MESSAGING_TWILIO_AUTH_TOKEN)
+                self.errored = True
 
-                twilio_message = None
-
-                if self.message.startswith('image:'):
-                    twilio_message = client.messages.create(to=self.current_destination(), from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, media_url=[self.message[6:]]) # pylint: disable=unsubscriptable-object
-
-                    time.sleep(10)
-                else:
-                    twilio_message = client.messages.create(to=self.current_destination(), from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, body=self.fetch_message(transmission_metadata))
-
-                transmission_metadata['twilio_sid'] = twilio_message.sid
-
-            self.sent_date = timezone.now()
+                transmission_metadata['error'] = 'No processor found for message.'
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
-            self.errored = False
             self.save()
 
         except: # pylint: disable=bare-except

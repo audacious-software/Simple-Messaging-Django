@@ -1,7 +1,7 @@
 from django.conf.urls import url
 
-from .views import incoming_twilio
+from .views import incoming_message_request
 
 urlpatterns = [
-    url(r'^incoming.xml$', incoming_twilio, name='incoming_twilio'),
+    url(r'^incoming$', incoming_message_request, name='incoming_message'),
 ]
