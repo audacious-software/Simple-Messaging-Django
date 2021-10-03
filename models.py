@@ -142,14 +142,9 @@ class OutgoingMessage(models.Model):
             for app in settings.INSTALLED_APPS:
                 if processed is False:
                     try:
-                        print('TRY 0: ' + app)
                         response_module = importlib.import_module('.simple_messaging_api', package=app)
 
-                        print('TRY 1: ' + app)
-
                         metadata = response_module.process_outgoing_message(self)
-
-                        print('TRY 2: ' + app + ' -- ' + str(metadata))
 
                         if metadata is not None:
                             processed = True
