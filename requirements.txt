@@ -9,4 +9,4 @@ pylint==2.6.0; python_version >= '3.0'
 pylint==2.11.1; python_version < '3.0'
 PyNaCl==1.4.0
 pytz==2021.3
-
+requests==2.26.0
