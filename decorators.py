@@ -56,7 +56,7 @@ def handle_lock(handle):
         logging.debug("-" * 72)
 
         lock_name = self.__module__.split('.').pop()
-        lock = FileLock('%s/%s__%s' % (tempfile.gettempdir(), lock_prefix, lock_name))
+        lock = FileLock('%s/%s__%s' % (tempfile.gettempdir(), lock_prefix, lock_name)) # pylint: disable=consider-using-f-string
 
         logging.debug("%s - acquiring lock...", lock_name)
 
