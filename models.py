@@ -150,9 +150,9 @@ class OutgoingMessage(models.Model):
                             processed = True
                             processed_metadata.update(metadata)
                     except ImportError:
-                        traceback.print_exc() #pass
+                        pass
                     except AttributeError:
-                        traceback.print_exc() #pass
+                        pass
 
             transmission_metadata = {}
 
