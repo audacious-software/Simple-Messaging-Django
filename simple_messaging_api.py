@@ -1,8 +1,3 @@
-# pylint: disable=wrong-import-position, wrong-import-order
-
-from future.standard_library import install_aliases
-install_aliases()
-
 import binascii
 import json
 
@@ -10,6 +5,7 @@ from urllib.parse import urlparse
 
 import requests
 
+from future.moves.urllib.parse import urlparse
 from nacl.signing import SigningKey
 
 from django.conf import settings
