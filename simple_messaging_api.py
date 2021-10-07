@@ -1,8 +1,6 @@
 import binascii
 import json
 
-from urllib.parse import urlparse
-
 import requests
 
 from future.moves.urllib.parse import urlparse
