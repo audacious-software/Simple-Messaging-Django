@@ -7,8 +7,6 @@ import importlib
 import json
 import traceback
 
-import requests
-
 from nacl.secret import SecretBox
 
 from django.conf import settings
@@ -71,32 +69,24 @@ class OutgoingMessage(models.Model):
 
         for token in tokens: # pylint: disable=too-many-nested-blocks
             if token.lower().startswith('http://') or token.lower().startswith('https://'):
-                try:
-                    if ('bit.ly' in token.lower()) is False:
-                        link = token
+                short_url = None
+                long_url = token
 
-                        headers = {'Authorization': 'Bearer ' + settings.BITLY_ACCESS_CODE}
+                for app in settings.INSTALLED_APPS:
+                    if short_url is None:
+                        try:
+                            shorten_module = importlib.import_module('.simple_messaging_api', package=app)
 
-                        # post_data = {'long_url': urllib.quote_plus(self.get_absolute_url())}
-                        post_data = {'long_url': link}
+                            short_url = shorten_module.shorten_url(long_url, metadata=metadata)
+                        except ImportError:
+                            pass
+                        except AttributeError:
+                            pass
 
-                        fetch_url = 'https://api-ssl.bitly.com/v4/shorten'
-
-                        fetch_request = requests.post(fetch_url, headers=headers, json=post_data)
-
-                        if fetch_request.status_code >= 200 and fetch_request.status_code < 300:
-                            if metadata is not None and ('shortened_urls' in metadata) is False:
-                                metadata['shortened_urls'] = {}
-
-                            link = fetch_request.json()['link']
-
-                            metadata['shortened_urls'][post_data['long_url']] = link
-
-                        new_tokens.append(link)
-                    else:
-                        new_tokens.append(token)
-                except AttributeError:
-                    new_tokens.append(token)
+                if short_url is not None:
+                    new_tokens.append(short_url)
+                else:
+                    new_tokens.append(long_url)
             else:
                 new_tokens.append(token)
 
