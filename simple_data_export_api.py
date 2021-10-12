@@ -5,6 +5,12 @@ import io
 import os
 import tempfile
 
+import phonenumbers
+
+from django.conf import settings
+
+from simple_data_export.utils import fetch_export_identifier
+
 from .models import IncomingMessage, OutgoingMessage
 
 def export_data_sources(params=None):
@@ -67,7 +73,7 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
 
                     message = {
                         'sender': 'System',
-                        'recipient': destination,
+                        'recipient': fetch_export_identifier(destination),
                         'timestamp': outgoing.sent_date.isoformat(),
                         'direction': 'to-recipient',
                         'message': outgoing.message,
@@ -92,7 +98,7 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
                         source_messages[sender] = []
 
                     message = {
-                        'sender': sender,
+                        'sender': fetch_export_identifier(sender),
                         'recipient': 'System',
                         'timestamp': incoming.receive_date.isoformat(),
                         'direction': 'to-system',
@@ -119,5 +125,39 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
                         writer.writerow(row)
 
         return filename
+
+    return None
+
+def obfuscate_identifier(identifier):
+    if settings.SIMPLE_DATA_EXPORTER_OBFUSCATE_IDENTIFIERS: # pylint: disable=too-many-nested-blocks
+        try:
+            number = phonenumbers.parse(identifier, settings.SIMPLE_DATA_EXPORTER_COUNTRY_CODE)
+
+            formatted = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
+
+            if phonenumbers.is_valid_number(number):
+                if number.country_code == 1:
+                    new_formatted = ''
+
+                    for i in range(0, len(formatted)): # pylint: disable=consider-using-enumerate
+                        if i in (2, 3, 4, 5, 6,):
+                            new_formatted += 'X'
+                        else:
+                            new_formatted += formatted[i]
+
+                    return new_formatted
+
+            new_formatted = ''
+
+            for i in range(0, len(formatted)): # pylint: disable=consider-using-enumerate
+                if i < (len(formatted) - 5):
+                    new_formatted += 'X'
+                else:
+                    new_formatted += formatted[i]
+
+            return new_formatted
+
+        except phonenumbers.phonenumberutil.NumberParseException:
+            pass
 
     return None
