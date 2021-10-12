@@ -44,6 +44,7 @@ jobs:
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
+            mkdir -p media/simple_data_export_uploads
             python manage.py migrate
             python manage.py test
             cp simple_messaging/.pylintrc .
@@ -93,6 +94,7 @@ jobs:
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
+            mkdir -p media/simple_data_export_uploads
             python manage.py migrate
             python manage.py test
             cp simple_messaging/.pylintrc .
