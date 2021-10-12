@@ -100,4 +100,4 @@ STATIC_ROOT = 'static'
 SIMPLE_DATA_EXPORTER_OBFUSCATE_IDENTIFIERS = True
 SIMPLE_DATA_EXPORTER_SITE_NAME = 'Simple Messaging Site'
 
-SITE_URL = 'https://' + ALLOWED_HOSTS[0]
+SITE_URL = 'https://example.com'
