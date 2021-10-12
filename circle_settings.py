@@ -27,7 +27,8 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.gis',
-    'simple_messaging'
+    'simple_messaging',
+    'simple_data_export',
 )
 
 MIDDLEWARE = (
@@ -96,3 +97,7 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 
+SIMPLE_DATA_EXPORTER_OBFUSCATE_IDENTIFIERS = True
+SIMPLE_DATA_EXPORTER_SITE_NAME = 'Simple Messaging Site'
+
+SITE_URL = 'https://' + ALLOWED_HOSTS[0]

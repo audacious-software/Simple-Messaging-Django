@@ -41,6 +41,7 @@ jobs:
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
+            git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
             python manage.py migrate
@@ -89,6 +90,7 @@ jobs:
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
+            git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
             python manage.py migrate
