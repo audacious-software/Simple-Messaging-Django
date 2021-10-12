@@ -97,6 +97,9 @@ USE_TZ = True
 STATIC_URL = '/static/'
 STATIC_ROOT = 'static'
 
+MEDIA_URL = '/media/'
+MEDIA_ROOT = str(BASE_DIR) + '/media/'
+
 SIMPLE_DATA_EXPORTER_OBFUSCATE_IDENTIFIERS = True
 SIMPLE_DATA_EXPORTER_SITE_NAME = 'Simple Messaging Site'
 
