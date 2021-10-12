@@ -41,7 +41,7 @@ def export_data_types():
 
 def compile_data_export(data_type, data_sources, start_time=None, end_time=None, custom_parameters=None): # pylint: disable=too-many-locals, unused-argument, too-many-branches
     here_tz = pytz.timezone(settings.TIME_ZONE)
-    
+
     if data_type == 'simple_messaging.conversation_transcripts':
         filename = tempfile.gettempdir() + os.path.sep + 'simple_messaging.conversation_transcripts' + '.txt'
 
