@@ -6,6 +6,7 @@ import os
 import tempfile
 
 import phonenumbers
+import pytz
 
 from django.conf import settings
 
@@ -39,6 +40,8 @@ def export_data_types():
     ]
 
 def compile_data_export(data_type, data_sources, start_time=None, end_time=None, custom_parameters=None): # pylint: disable=too-many-locals, unused-argument, too-many-branches
+    here_tz = pytz.timezone(settings.TIME_ZONE)
+    
     if data_type == 'simple_messaging.conversation_transcripts':
         filename = tempfile.gettempdir() + os.path.sep + 'simple_messaging.conversation_transcripts' + '.txt'
 
@@ -74,7 +77,7 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
                     message = {
                         'sender': 'System',
                         'recipient': fetch_export_identifier(destination),
-                        'timestamp': outgoing.sent_date.isoformat(),
+                        'timestamp': outgoing.sent_date.astimezone(here_tz).isoformat(),
                         'direction': 'to-recipient',
                         'message': outgoing.message,
                         'error': outgoing.errored,
@@ -100,7 +103,7 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
                     message = {
                         'sender': fetch_export_identifier(sender),
                         'recipient': 'System',
-                        'timestamp': incoming.receive_date.isoformat(),
+                        'timestamp': incoming.receive_date.astimezone(here_tz).isoformat(),
                         'direction': 'to-system',
                         'message': incoming.message,
                         'error': False,
