@@ -15,7 +15,7 @@ SECRET_KEY = 'foobar' # nosec
 DEBUG = False
 ADMINS = [('Chris Karr', 'chris@audacious-software.com')]
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['example.com']
 
 # Application definition
 
@@ -100,4 +100,4 @@ STATIC_ROOT = 'static'
 SIMPLE_DATA_EXPORTER_OBFUSCATE_IDENTIFIERS = True
 SIMPLE_DATA_EXPORTER_SITE_NAME = 'Simple Messaging Site'
 
-SITE_URL = 'https://example.com'
+SITE_URL = 'https://' + ALLOWED_HOSTS[0]
