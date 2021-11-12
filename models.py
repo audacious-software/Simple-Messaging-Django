@@ -63,7 +63,7 @@ class OutgoingMessage(models.Model):
     transmission_metadata = models.TextField(blank=True, null=True)
 
     def fetch_message(self, metadata): # pylint: disable=dangerous-default-value
-        tokens = self.message.split(' ')
+        tokens = self.current_message().split(' ')
 
         new_tokens = []
 
@@ -117,6 +117,29 @@ class OutgoingMessage(models.Model):
     def encrypt_destination(self):
         if self.destination.startswith('secret:') is False:
             self.update_destination(self.destination, force=True)
+
+    def current_message(self):
+        if self.message is not None and self.message.startswith('secret:'):
+            return decrypt_value(self.message)
+
+        return self.message
+
+    def update_message(self, new_message, force=False):
+        if force is False and new_message == self.current_message():
+            return # Same as current - don't add
+
+        if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+            encrypted_message = encrypt_value(new_message)
+
+            self.message = encrypted_message
+        else:
+            self.message = new_message
+
+        self.save()
+
+    def encrypt_message(self):
+        if self.message.startswith('secret:') is False:
+            self.update_message(self.message, force=True)
 
     def transmit(self):
         if self.sent_date is not None:
@@ -187,6 +210,29 @@ class IncomingMessage(models.Model):
     message = models.TextField(max_length=1024)
 
     transmission_metadata = models.TextField(blank=True, null=True)
+
+    def current_message(self):
+        if self.message is not None and self.message.startswith('secret:'):
+            return decrypt_value(self.message)
+
+        return self.message
+
+    def update_message(self, new_message, force=False):
+        if force is False and new_message == self.current_message():
+            return # Same as current - don't add
+
+        if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+            encrypted_message = encrypt_value(new_message)
+
+            self.message = encrypted_message
+        else:
+            self.message = new_message
+
+        self.save()
+
+    def encrypt_message(self):
+        if self.message.startswith('secret:') is False:
+            self.update_message(self.message, force=True)
 
     def current_sender(self):
         if self.sender is not None and self.sender.startswith('secret:'):
