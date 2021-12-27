@@ -2,120 +2,96 @@
 
 import importlib
 import json
-import mimetypes
 
-from io import BytesIO
-
-import requests
+import arrow
+import phonenumbers
 
 from django.conf import settings
-from django.core import files
-from django.http import HttpResponse
-from django.views.decorators.csrf import csrf_exempt
+from django.contrib.admin.views.decorators import staff_member_required
+from django.core.management import call_command
+from django.http import Http404, HttpResponse
+from django.shortcuts import render
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 
-from .models import IncomingMessage, IncomingMessageMedia
+from .models import IncomingMessage, OutgoingMessage
 
 @csrf_exempt
-def incoming_twilio(request): # pylint: disable=too-many-branches,too-many-locals,too-many-statements
-    response = '<?xml version="1.0" encoding="UTF-8" ?><Response>'
-
-    responses = []
-
+def incoming_message_request(request):
     for app in settings.INSTALLED_APPS:
         try:
             response_module = importlib.import_module('.simple_messaging_api', package=app)
 
-            responses.extend(response_module.simple_messaging_response(request.POST))
+            return response_module.process_incoming_request(request)
         except ImportError:
             pass
         except AttributeError:
             pass
 
-    for message in responses:
-        response += '<Message>' + message + '</Message>'
+    raise Http404("No module found to process incoming message.")
 
-    response += '</Response>'
+@staff_member_required
+def simple_messaging_ui(request):
+    return render(request, 'simple_messaging_ui.html')
 
-    if request.method == 'POST': # pylint: disable=too-many-nested-blocks
-        record_responses = True
+@staff_member_required
+def simple_messaging_messages_json(request):
+    messages = []
 
-        for app in settings.INSTALLED_APPS:
-            try:
-                response_module = importlib.import_module('.simple_messaging_api', package=app)
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '')
+        since = float(request.POST.get('since', '0'))
 
-                record_responses = response_module.simple_messaging_record_response(request.POST)
-            except ImportError:
-                pass
-            except AttributeError:
-                pass
+        start_time = arrow.get(since).datetime
 
-        if record_responses:
-            now = timezone.now()
+        parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
 
-            destination = request.POST['To']
-            sender = request.POST['From']
+        destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
 
-            incoming = IncomingMessage(recipient=destination, sender=sender)
-            incoming.receive_date = now
-            incoming.message = request.POST['Body'].strip()
-            incoming.transmission_metadata = json.dumps(dict(request.POST), indent=2)
+        for message in IncomingMessage.objects.filter(receive_date__gte=start_time):
+            if message.current_sender() == destination:
+                messages.append({
+                    'direction': 'from-user',
+                    'sender': destination,
+                    'message': message.current_message(),
+                    'timestamp': arrow.get(message.receive_date).float_timestamp
+                })
 
-            incoming.save()
+        for message in OutgoingMessage.objects.filter(sent_date__gte=start_time):
+            if message.current_destination() == destination:
+                messages.append({
+                    'direction': 'from-system',
+                    'recipient': destination,
+                    'message': message.current_message(),
+                    'timestamp': arrow.get(message.sent_date).float_timestamp
+                })
 
-            incoming.encrypt_sender()
+    return HttpResponse(json.dumps(messages, indent=2), content_type='application/json', status=200)
 
-            num_media = 0
+@staff_member_required
+def simple_messaging_send_json(request):
+    result = {
+        'success': False
+    }
 
-            media_objects = {}
+    if request.method == 'POST':
+        phone = request.POST.get('phone', '')
+        message = request.POST.get('message', '')
 
-            if 'NumMedia' in request.POST:
-                num_media = int(request.POST['NumMedia'])
+        parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
+        destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
 
-                for i in range(0, num_media):
-                    media = IncomingMessageMedia(message=incoming)
+        outgoing = OutgoingMessage.objects.create(destination=destination, send_date=timezone.now(), message=message)
+        outgoing.encrypt_message()
+        outgoing.encrypt_destination()
 
-                    media.content_url = request.POST['MediaUrl' + str(i)]
-                    media.content_type = request.POST['MediaContentType' + str(i)]
-                    media.index = i
+        call_command('simple_messaging_send_pending_messages')
 
-                    media.save()
+        outgoing = OutgoingMessage.objects.get(pk=outgoing.pk)
 
-                    media_response = requests.get(media.content_url)
+        if outgoing.errored is False:
+            result['success'] = True
+        else:
+            result['error'] = 'Unable to send message, please investigate.'
 
-                    if media_response.status_code != requests.codes.ok:
-                        continue
-
-                    filename = media.content_url.split('/')[-1]
-
-                    extension = mimetypes.guess_extension(media.content_type)
-
-                    if extension is not None:
-                        if extension == '.jpe':
-                            extension = '.jpg'
-
-                        filename += extension
-
-                    file_bytes = BytesIO()
-                    file_bytes.write(media_response.content)
-
-                    media.content_file.save(filename, files.File(file_bytes))
-                    media.save()
-
-                    media_objects[filename] = {
-                        'content': file_bytes.getvalue(),
-                        'mime-type': media.content_type
-                    }
-
-            for app in settings.INSTALLED_APPS:
-                try:
-                    response_module = importlib.import_module('.simple_messaging_api', package=app)
-
-                    response_module.process_incoming_message(incoming)
-                except ImportError:
-                    pass
-                except AttributeError:
-                    pass
-
-
-    return HttpResponse(response, content_type='text/xml')
+    return HttpResponse(json.dumps(result, indent=2), content_type='application/json', status=200)

@@ -31,6 +31,7 @@ jobs:
             sudo apt-get update && sudo apt-get install -y gdal-bin
             python3 -m venv /home/circleci/venv
             . /home/circleci/venv/bin/activate
+            pip install --upgrade pip
             pip install -r requirements.txt --progress-bar off
             cd ..
             mv project simple_messaging
@@ -40,8 +41,10 @@ jobs:
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
+            git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
+            mkdir -p media/simple_data_export_uploads
             python manage.py migrate
             python manage.py test
             cp simple_messaging/.pylintrc .
@@ -78,6 +81,7 @@ jobs:
             sudo apt-get update && sudo apt-get install -y gdal-bin
             virtualenv /home/circleci/venv
             . /home/circleci/venv/bin/activate
+            pip install --upgrade pip
             pip install -r requirements.txt --progress-bar off
             cd ..
             mv project simple_messaging
@@ -87,8 +91,10 @@ jobs:
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
+            git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
+            mkdir -p media/simple_data_export_uploads
             python manage.py migrate
             python manage.py test
             cp simple_messaging/.pylintrc .

@@ -1,0 +1,223 @@
+{% load static from static %}
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<title>Message Console | Simple Messaging</title>
+		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF" crossorigin="anonymous">
+		<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-kQtW33rZJAHjgefvhyyzcGF3C5TFyBQBA13V1RKPf4uH+bwyzQxZ6CmMZHmNBEfJ" crossorigin="anonymous"></script>
+		<script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+		<script src="https://kit.fontawesome.com/e184dbcca7.js" crossorigin="anonymous"></script>
+		<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+		<style>
+			.container {
+				max-width: 960px;
+			}		
+		</style>
+	</head>
+	<body class="bg-light">
+		{% csrf_token %}
+		<div class="container">	
+			<div class="row">
+        		<div class="col-md-12 pb-3 mt-3">
+        			<h4>Message Console</h4>
+        		</div>
+        	</div>
+			<div class="row">
+				<div class="col-md-12 mb-3">
+					<div class="border rounded-2 p-3 bg-white" id="message_box" style="overflow-y: scroll;">
+
+					</div>
+				</div>
+				<div class="col-md-3 mb-3">
+					<div class="input-group">
+						<span class="input-group-text" id="phone-addon">@</span>
+						<input type="text" class="form-control" id="phone_number" placeholder="Phone Number" aria-label="Phone Number" aria-describedby="phone-addon">
+					</div>
+				</div>
+
+				<div class="col-md-9 mb-3">
+					<div class="input-group">
+						<input type="text" class="form-control" id="message" placeholder="Message" aria-label="Message" aria-describedby="message-addon">
+						<button class="btn btn-outline-secondary" id="send_button" type="button" id="message-addon">Send</button>
+					</div>
+				</div>
+			</div>
+        </div>
+	</body>
+	<script>
+		$(document).ready(function() {
+			var csrftoken = $("[name=csrfmiddlewaretoken]").val();
+
+			function csrfSafeMethod(method) {
+				return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+			}
+
+			$.ajaxSetup({
+				beforeSend: function(xhr, settings) {
+					if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+						xhr.setRequestHeader("X-CSRFToken", csrftoken);
+					}
+				}
+			});
+
+			const cachedMessages = {};
+			
+			const loadMessages = function(messages) {
+				$.each(messages, function(index, message) {
+					let itemHtml = '';
+					
+					let formattedTime = moment(message['timestamp'] * 1000).format('MMMM Do YYYY, h:mm:ss a');
+					
+					if (message['direction'] == "from-user") {
+						itemHtml += '<div class="row mt-3">';
+						itemHtml += '    <div class="col-md-8">';
+						itemHtml += '      <div class="card text-white bg-secondary">';
+						itemHtml += '        <div class="card-body">';
+						itemHtml += '          <p class="card-text">' + message['message'] + '</p>';						
+						itemHtml += '          <small>' + formattedTime + '</small>';
+						itemHtml += '        </div>';
+						itemHtml += '      </div>';
+						itemHtml += '    </div>';
+						itemHtml += '    <div class="col-md-4">';
+						itemHtml += '    </div>';
+						itemHtml += '  </div>';
+						itemHtml += '</div>';
+					} else {
+						itemHtml += '<div class="row mt-3">';
+						itemHtml += '    <div class="col-md-4">';
+						itemHtml += '    </div>';
+						itemHtml += '    <div class="col-md-8">';
+						itemHtml += '      <div class="card text-white bg-primary">';
+						itemHtml += '        <div class="card-body">';
+						itemHtml += '          <p class="card-text">' + message['message'] + '</p>';	
+						itemHtml += '          <small>' + formattedTime + '</small>';			
+						itemHtml += '        </div>';
+						itemHtml += '      </div>';
+						itemHtml += '    </div>';
+						itemHtml += '  </div>';
+						itemHtml += '</div>';
+					}
+
+					$("#message_box").append(itemHtml);
+				});
+				
+				if (messages.length > 0) {
+					$('#message_box').scrollTop($('#message_box')[0].scrollHeight);
+				};
+			};
+			
+			const fetchMessages = function(phone) {
+				let payload = {
+					"phone": phone
+				};
+				
+				if (cachedMessages[phone] != undefined) {
+					const messages = cachedMessages[phone];
+					
+					if (messages.length > 0) {
+						payload["since"] = messages[messages.length -1]["timestamp"];
+					}
+				}
+				
+				$.post("{% url 'simple_messaging_messages_json' %}", payload, function(data) {
+					if (cachedMessages[phone] == undefined) {
+						cachedMessages[phone] = [];
+					}
+					
+					cachedMessages[phone] = cachedMessages[phone].concat(data);
+
+					data.sort(function(a, b){
+						return a['timestamp'] - b['timestamp'];
+					});
+
+					cachedMessages[phone].sort(function(a, b){
+						return a['timestamp'] - b['timestamp'];
+					});
+					
+					loadMessages(data);
+				});
+			};
+
+			{% if request.session.simple_messaging_ui_last_phonenumber %}
+				let lastPhone = "{{ request.session.simple_messaging_ui_last_phonenumber }}";
+			{% else %}
+				let lastPhone = "";
+			{% endif %}
+			
+			const refresh = function() {
+				if (lastPhone.length >= 10) {
+					fetchMessages(lastPhone);
+					
+					window.setTimeout(refresh, 5000);
+				}
+			};
+			
+			$("#message_box").height($(window).height() - 200);
+			
+			const toggleSend = function() {
+				const phone = $("#phone_number").val().replace(/[^\d]/g, '');
+				const message = $("#message").val().trim();
+
+				if (message.length == 0) {
+					$("#send_button").prop('disabled', true);
+				} else if (phone.length < 10) {
+					$("#send_button").prop('disabled', true);
+				} else {
+					$("#send_button").prop('disabled', false);
+				}				
+			};
+			
+			$("#phone_number").on("keyup change", function(e) {
+				let phone = $("#phone_number").val().replace(/[^\d]/g, '');
+				
+				window.clearTimeout(refresh);
+				
+				if (phone.length < 10) {
+					$("#message_box").html("");
+				} else {
+					lastPhone = phone;
+					
+					if (cachedMessages[phone] != undefined) {
+						loadMessages(cachedMessages[phone]);
+					} else {
+						fetchMessages(phone);
+
+					}
+
+					window.setTimeout(refresh, 5000);
+				}
+				
+				toggleSend();
+			});
+
+			$("#message").on("keyup change", function(e) {
+				toggleSend();
+			});
+			
+			$("#send_button").click(function(eventObj) {
+				eventObj.preventDefault();
+				
+				const message = $("#message").val().trim();
+				let phone = $("#phone_number").val().replace(/[^\d]/g, '');
+				
+				let payload = {
+					"phone": phone,
+					"message": message
+				};
+				
+				$.post("{% url 'simple_messaging_send_json' %}", payload, function(data) {
+					$("#message").val("");
+					fetchMessages(phone);
+				});
+			});
+			
+			if (lastPhone != "") {
+				$("#phone_number").val(lastPhone);
+			}
+		});
+	</script>
+</html>

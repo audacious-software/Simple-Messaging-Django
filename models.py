@@ -5,13 +5,9 @@ from __future__ import unicode_literals
 import base64
 import importlib
 import json
-import time
 import traceback
 
-import requests
-
 from nacl.secret import SecretBox
-from twilio.rest import Client
 
 from django.conf import settings
 from django.db import models
@@ -67,38 +63,30 @@ class OutgoingMessage(models.Model):
     transmission_metadata = models.TextField(blank=True, null=True)
 
     def fetch_message(self, metadata): # pylint: disable=dangerous-default-value
-        tokens = self.message.split(' ')
+        tokens = self.current_message().split(' ')
 
         new_tokens = []
 
         for token in tokens: # pylint: disable=too-many-nested-blocks
             if token.lower().startswith('http://') or token.lower().startswith('https://'):
-                try:
-                    if ('bit.ly' in token.lower()) is False:
-                        link = token
+                short_url = None
+                long_url = token
 
-                        headers = {'Authorization': 'Bearer ' + settings.BITLY_ACCESS_CODE}
+                for app in settings.INSTALLED_APPS:
+                    if short_url is None:
+                        try:
+                            shorten_module = importlib.import_module('.simple_messaging_api', package=app)
 
-                        # post_data = {'long_url': urllib.quote_plus(self.get_absolute_url())}
-                        post_data = {'long_url': link}
+                            short_url = shorten_module.shorten_url(long_url, metadata=metadata)
+                        except ImportError:
+                            pass
+                        except AttributeError:
+                            pass
 
-                        fetch_url = 'https://api-ssl.bitly.com/v4/shorten'
-
-                        fetch_request = requests.post(fetch_url, headers=headers, json=post_data)
-
-                        if fetch_request.status_code >= 200 and fetch_request.status_code < 300:
-                            if metadata is not None and ('shortened_urls' in metadata) is False:
-                                metadata['shortened_urls'] = {}
-
-                            link = fetch_request.json()['link']
-
-                            metadata['shortened_urls'][post_data['long_url']] = link
-
-                        new_tokens.append(link)
-                    else:
-                        new_tokens.append(token)
-                except AttributeError:
-                    new_tokens.append(token)
+                if short_url is not None:
+                    new_tokens.append(short_url)
+                else:
+                    new_tokens.append(long_url)
             else:
                 new_tokens.append(token)
 
@@ -130,6 +118,29 @@ class OutgoingMessage(models.Model):
         if self.destination.startswith('secret:') is False:
             self.update_destination(self.destination, force=True)
 
+    def current_message(self):
+        if self.message is not None and self.message.startswith('secret:'):
+            return decrypt_value(self.message)
+
+        return self.message
+
+    def update_message(self, new_message, force=False):
+        if force is False and new_message == self.current_message():
+            return # Same as current - don't add
+
+        if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+            encrypted_message = encrypt_value(new_message)
+
+            self.message = encrypted_message
+        else:
+            self.message = new_message
+
+        self.save()
+
+    def encrypt_message(self):
+        if self.message.startswith('secret:') is False:
+            self.update_message(self.message, force=True)
+
     def transmit(self):
         if self.sent_date is not None:
             raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.')
@@ -142,18 +153,19 @@ class OutgoingMessage(models.Model):
             processed_metadata = {}
 
             for app in settings.INSTALLED_APPS:
-                try:
-                    response_module = importlib.import_module('.simple_messaging_api', package=app)
+                if processed is False:
+                    try:
+                        response_module = importlib.import_module('.simple_messaging_api', package=app)
 
-                    metadata = response_module.process_outgoing_message(self)
+                        metadata = response_module.process_outgoing_message(self)
 
-                    if metadata is not None:
-                        processed = True
-                        processed_metadata.update(metadata)
-                except ImportError:
-                    pass
-                except AttributeError:
-                    pass
+                        if metadata is not None:
+                            processed = True
+                            processed_metadata.update(metadata)
+                    except ImportError:
+                        pass
+                    except AttributeError:
+                        pass
 
             transmission_metadata = {}
 
@@ -162,25 +174,17 @@ class OutgoingMessage(models.Model):
 
             if processed:
                 transmission_metadata.update(processed_metadata)
+
+                self.sent_date = timezone.now()
+
+                self.errored = False
             else:
-                client = Client(settings.SIMPLE_MESSAGING_TWILIO_CLIENT_ID, settings.SIMPLE_MESSAGING_TWILIO_AUTH_TOKEN)
+                self.errored = True
 
-                twilio_message = None
-
-                if self.message.startswith('image:'):
-                    twilio_message = client.messages.create(to=self.current_destination(), from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, media_url=[self.message[6:]]) # pylint: disable=unsubscriptable-object
-
-                    time.sleep(10)
-                else:
-                    twilio_message = client.messages.create(to=self.current_destination(), from_=settings.SIMPLE_MESSAGING_TWILIO_PHONE_NUMBER, body=self.fetch_message(transmission_metadata))
-
-                transmission_metadata['twilio_sid'] = twilio_message.sid
-
-            self.sent_date = timezone.now()
+                transmission_metadata['error'] = 'No processor found for message.'
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
-            self.errored = False
             self.save()
 
         except: # pylint: disable=bare-except
@@ -206,6 +210,29 @@ class IncomingMessage(models.Model):
     message = models.TextField(max_length=1024)
 
     transmission_metadata = models.TextField(blank=True, null=True)
+
+    def current_message(self):
+        if self.message is not None and self.message.startswith('secret:'):
+            return decrypt_value(self.message)
+
+        return self.message
+
+    def update_message(self, new_message, force=False):
+        if force is False and new_message == self.current_message():
+            return # Same as current - don't add
+
+        if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+            encrypted_message = encrypt_value(new_message)
+
+            self.message = encrypted_message
+        else:
+            self.message = new_message
+
+        self.save()
+
+    def encrypt_message(self):
+        if self.message.startswith('secret:') is False:
+            self.update_message(self.message, force=True)
 
     def current_sender(self):
         if self.sender is not None and self.sender.startswith('secret:'):
