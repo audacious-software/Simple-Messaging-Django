@@ -183,8 +183,6 @@ class OutgoingMessage(models.Model):
                 self.errored = True
 
                 transmission_metadata['error'] = 'No processor found for message.'
-                
-                print('Missing message processor (likely transmission module not installed). Please verify configuration.')
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
