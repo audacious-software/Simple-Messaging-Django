@@ -1,6 +1,7 @@
 # pylint: disable=line-too-long, no-member
 # -*- coding: utf-8 -*-
-from __future__ import unicode_literals
+
+from __future__ import unicode_literals, print_function
 
 import base64
 import importlib
@@ -182,6 +183,8 @@ class OutgoingMessage(models.Model):
                 self.errored = True
 
                 transmission_metadata['error'] = 'No processor found for message.'
+                
+                print('Missing message processor (likely transmission module not installed). Please verify configuration.')
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
