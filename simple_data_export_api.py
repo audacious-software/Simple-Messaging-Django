@@ -134,7 +134,7 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
 def obfuscate_identifier(identifier):
     if settings.SIMPLE_DATA_EXPORTER_OBFUSCATE_IDENTIFIERS: # pylint: disable=too-many-nested-blocks
         try:
-            number = phonenumbers.parse(identifier, settings.SIMPLE_DATA_EXPORTER_COUNTRY_CODE)
+            number = phonenumbers.parse(identifier, settings.SIMPLE_MESSAGING_COUNTRY_CODE)
 
             formatted = phonenumbers.format_number(number, phonenumbers.PhoneNumberFormat.E164)
 
