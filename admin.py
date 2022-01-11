@@ -6,6 +6,7 @@ import json
 
 from django.conf import settings
 from django.contrib import admin
+from django.utils import timezone
 
 from .models import OutgoingMessage, IncomingMessage, IncomingMessageMedia
 
@@ -26,7 +27,22 @@ def reset_resend_messages(modeladmin, request, queryset): # pylint: disable=unus
 
         message.save()
 
-reset_resend_messages.short_description = "Reset and resend selected messages"
+def mark_error_handled(modeladmin, request, queryset): # pylint: disable=unused-argument
+    for message in queryset:
+        metadata = {}
+
+        try:
+            metadata = json.loads(message.transmission_metadata)
+        except ValueError:
+            metadata = {}
+
+        metadata['error_handled'] = timezone.now().isoformat()
+
+        message.transmission_metadata = json.dumps(metadata, indent=2)
+
+        message.save()
+
+mark_error_handled.short_description = "Mark error handled"
 
 @admin.register(OutgoingMessage)
 class OutgoingMessageAdmin(admin.ModelAdmin):
@@ -37,7 +53,7 @@ class OutgoingMessageAdmin(admin.ModelAdmin):
 
     search_fields = ('destination', 'message', 'transmission_metadata',)
     list_filter = ('errored', 'send_date', 'sent_date',)
-    actions = [reset_resend_messages]
+    actions = [reset_resend_messages, mark_error_handled]
 
 @admin.register(IncomingMessage)
 class IncomingMessageAdmin(admin.ModelAdmin):
