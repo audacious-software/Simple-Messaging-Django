@@ -32,7 +32,11 @@ def incoming_message_request(request):
 
 @staff_member_required
 def simple_messaging_ui(request):
-    return render(request, 'simple_messaging_ui.html')
+    context = {
+        'identifier': request.GET.get('identifier', '')
+    }
+
+    return render(request, 'simple_messaging_ui.html', context)
 
 @staff_member_required
 def simple_messaging_messages_json(request):
@@ -44,27 +48,47 @@ def simple_messaging_messages_json(request):
 
         start_time = arrow.get(since).datetime
 
-        parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
+        real_phone = None
 
-        destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+        for app in settings.INSTALLED_APPS:
+            if real_phone is None:
+                try:
+                    message_module = importlib.import_module('.simple_messaging_api', package=app)
 
-        for message in IncomingMessage.objects.filter(receive_date__gte=start_time):
-            if message.current_sender() == destination:
-                messages.append({
-                    'direction': 'from-user',
-                    'sender': destination,
-                    'message': message.current_message(),
-                    'timestamp': arrow.get(message.receive_date).float_timestamp
-                })
+                    real_phone = message_module.fetch_phone_number(phone)
+                except ImportError:
+                    pass
+                except AttributeError:
+                    pass
 
-        for message in OutgoingMessage.objects.filter(sent_date__gte=start_time):
-            if message.current_destination() == destination:
-                messages.append({
-                    'direction': 'from-system',
-                    'recipient': destination,
-                    'message': message.current_message(),
-                    'timestamp': arrow.get(message.sent_date).float_timestamp
-                })
+        if real_phone is not None:
+            phone = real_phone
+
+        try:
+
+            parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
+
+            destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+
+            for message in IncomingMessage.objects.filter(receive_date__gt=start_time):
+                if message.current_sender() == destination:
+                    messages.append({
+                        'direction': 'from-user',
+                        'sender': destination,
+                        'message': message.current_message(),
+                        'timestamp': arrow.get(message.receive_date).float_timestamp
+                    })
+
+            for message in OutgoingMessage.objects.filter(sent_date__gt=start_time):
+                if message.current_destination() == destination:
+                    messages.append({
+                        'direction': 'from-system',
+                        'recipient': destination,
+                        'message': message.current_message(),
+                        'timestamp': arrow.get(message.sent_date).float_timestamp
+                    })
+        except phonenumbers.NumberParseException:
+            pass
 
     return HttpResponse(json.dumps(messages, indent=2), content_type='application/json', status=200)
 
@@ -77,6 +101,22 @@ def simple_messaging_send_json(request):
     if request.method == 'POST':
         phone = request.POST.get('phone', '')
         message = request.POST.get('message', '')
+
+        real_phone = None
+
+        for app in settings.INSTALLED_APPS:
+            if real_phone is None:
+                try:
+                    message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                    real_phone = message_module.fetch_phone_number(phone)
+                except ImportError:
+                    pass
+                except AttributeError:
+                    pass
+
+        if real_phone is not None:
+            phone = real_phone
 
         parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
         destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
