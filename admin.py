@@ -27,6 +27,8 @@ def reset_resend_messages(modeladmin, request, queryset): # pylint: disable=unus
 
         message.save()
 
+reset_resend_messages.short_description = "Reset and resend selected messages"
+
 def mark_error_handled(modeladmin, request, queryset): # pylint: disable=unused-argument
     for message in queryset:
         metadata = {}

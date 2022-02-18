@@ -62,6 +62,7 @@ class OutgoingMessage(models.Model):
     errored = models.BooleanField(default=False)
 
     transmission_metadata = models.TextField(blank=True, null=True)
+    message_metadata = models.TextField(blank=True, null=True)
 
     def fetch_message(self, metadata): # pylint: disable=dangerous-default-value
         tokens = self.current_message().split(' ')
