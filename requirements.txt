@@ -13,7 +13,8 @@ psycopg2-binary==2.8.6; python_version < '3.0'
 psycopg2-binary==2.9.1; python_version >= '3.0'
 pylint==1.9.5; python_version < '3.0'
 pylint==2.12.2; python_version >= '3.0'
-PyNaCl==1.4.0
-pytz==2021.3
+PyNaCl==1.4.0; python_version < '3.0'
+PyNaCl==1.5.0; python_version >= '3.0'
+ytz==2021.3
 requests==2.27.1
 zipstream==1.1.4
