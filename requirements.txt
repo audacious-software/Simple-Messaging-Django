@@ -15,5 +15,5 @@ pylint==1.9.5; python_version < '3.0'
 pylint==2.12.2; python_version >= '3.0'
 PyNaCl==1.4.0
 pytz==2021.3
-requests==2.26.0
+requests==2.27.1
 zipstream==1.1.4
