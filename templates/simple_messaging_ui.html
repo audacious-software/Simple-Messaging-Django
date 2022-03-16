@@ -10,7 +10,7 @@
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/css/bootstrap.min.css" integrity="sha384-uWxY/CJNBR+1zjPWmfnSnVxwRheevXITnMqoEIeG1LJrdI0GlVs/9cVSyPYXdcSF" crossorigin="anonymous">
         <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-kQtW33rZJAHjgefvhyyzcGF3C5TFyBQBA13V1RKPf4uH+bwyzQxZ6CmMZHmNBEfJ" crossorigin="anonymous"></script>
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-        <script src="https://kit.fontawesome.com/e184dbcca7.js" crossorigin="anonymous"></script>
+        <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
         <style>
             .container {
@@ -34,15 +34,23 @@
                 </div>
                 <div class="col-md-3 mb-3">
                     <div class="input-group">
-                        <span class="input-group-text" id="phone-addon">@</span>
+                        <span class="input-group-text material-icons" id="phone-addon">person</span>
                         <input type="text" class="form-control" id="phone_number" placeholder="Identifier" aria-label="Identifier" aria-describedby="phone-addon">
                     </div>
                 </div>
 
                 <div class="col-md-9 mb-3">
                     <div class="input-group">
-                        <input type="text" class="form-control" id="message" placeholder="Message" aria-label="Message" aria-describedby="message-addon">
-                        <button class="btn btn-outline-secondary" id="send_button" type="button" id="message-addon">Send</button>
+                        {% if precomposed %}
+                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">TXT</button>
+                            <ul class="dropdown-menu">
+                                {% for message in precomposed %}
+                                    <li><a class="dropdown-item precomposed-message" href="#" data-message="{{ message.1 }}">{{ message.0 }}</a></li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+                        <input type="text" class="form-control" id="message" placeholder="Message" aria-label="Message">
+                        <button class="btn btn-outline-secondary material-icons" id="send_button" type="button">send</button>
                     </div>
                 </div>
             </div>
@@ -149,7 +157,7 @@
                     });
 
                     loadMessages(data);
-                    
+
                     success()
                 });
             };
@@ -163,7 +171,7 @@
                     let lastPhone = "";
                 {% endif %}
             {% endif %}
-            
+
             let refreshIDs = []
 
             const refresh = function() {
@@ -171,10 +179,10 @@
                     fetchMessages(lastPhone, function() {
                         while (refreshIDs.length > 0) {
                             let refreshID = refreshIDs.pop()
-                            
+
                             window.clearTimeout(refreshID);
                         }
-                        
+
                         refreshIDs.push(window.setTimeout(refresh, 5000));
                     });
                 }
@@ -192,12 +200,12 @@
                     $("#send_button").prop('disabled', false);
                 }
             };
-            
+
             let lastNumberChange = Date.now()
 
             $("#phone_number").on("keyup change", function(e) {
                 let phone = $("#phone_number").val()
-            
+
                 if (phone != lastPhone) {
                     $("#message_box").html("");
                     lastPhone = phone;
@@ -207,7 +215,7 @@
                     } else {
                         refresh()
                     }
-                
+
                     lastPhone = phone
                 }
 
@@ -226,7 +234,7 @@
                 eventObj.preventDefault();
 
                 const message = $("#message").val().trim();
-                let phone = $("#phone_number").val().replace(/[^\d]/g, '');
+                let phone = $("#phone_number").val() // .replace(/[^\d]/g, '');
 
                 let payload = {
                     "phone": phone,
@@ -235,10 +243,10 @@
 
                 $.post("{% url 'simple_messaging_send_json' %}", payload, function(data) {
                     $("#message").val("");
-                    fetchMessages(phone);
+                    fetchMessages(phone, function() {});
                 });
             });
-            
+
             if (lastPhone != "") {
                 $("#phone_number").val(lastPhone);
 
@@ -246,6 +254,14 @@
 
                 $("#phone_number").change()
             }
+
+            $(".precomposed-message").click(function(eventObj) {
+                eventObj.preventDefault()
+
+                $("#message").val($(this).attr("data-message"))
+
+                toggleSend();
+            })
         });
     </script>
 </html>

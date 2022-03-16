@@ -36,6 +36,21 @@ def simple_messaging_ui(request):
         'identifier': request.GET.get('identifier', '')
     }
 
+    precomposed = []
+
+    for app in settings.INSTALLED_APPS:
+        try:
+            response_module = importlib.import_module('.simple_messaging_api', package=app)
+
+            precomposed.extend(response_module.simple_messaging_precomposed_messages())
+        except ImportError:
+            pass
+        except AttributeError:
+            pass
+
+    if len(precomposed) > 0:
+        context['precomposed'] = precomposed
+
     return render(request, 'simple_messaging_ui.html', context)
 
 @staff_member_required
