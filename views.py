@@ -48,7 +48,7 @@ def simple_messaging_ui(request):
         except AttributeError:
             pass
 
-    if len(precomposed) > 0:
+    if len(precomposed) > 0: # pylint: disable=len-as-condition
         context['precomposed'] = precomposed
 
     return render(request, 'simple_messaging_ui.html', context)
