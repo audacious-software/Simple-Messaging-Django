@@ -67,9 +67,11 @@ class OutgoingMessage(models.Model):
     def fetch_message(self, metadata): # pylint: disable=dangerous-default-value
         current_message = self.current_message()
 
-        tokens = current_message.split(' ')
+        tokens = current_message.replace('\n', ' ').replace('\r', ' ').split(' ')
 
-        new_tokens = []
+        tokens.sort(key=lambda token: len(token), reverse=True) # pylint: disable=unnecessary-lambda
+
+        print('TOKENS: %s' % tokens)
 
         for token in tokens: # pylint: disable=too-many-nested-blocks
             if token.lower().startswith('http://') or token.lower().startswith('https://'):
@@ -88,13 +90,10 @@ class OutgoingMessage(models.Model):
                             pass
 
                 if short_url is not None:
-                    new_tokens.append(short_url)
-                else:
-                    new_tokens.append(long_url)
-            else:
-                new_tokens.append(token)
+                    while long_url in current_message:
+                        current_message = current_message.replace(long_url, short_url)
 
-        self.message = ' '.join(new_tokens)
+        self.message = current_message
         self.save()
 
         return self.message
