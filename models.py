@@ -65,7 +65,9 @@ class OutgoingMessage(models.Model):
     message_metadata = models.TextField(blank=True, null=True)
 
     def fetch_message(self, metadata): # pylint: disable=dangerous-default-value
-        tokens = self.current_message().split(' ')
+        current_message = self.current_message()
+
+        tokens = current_message.split(' ')
 
         new_tokens = []
 
@@ -122,7 +124,7 @@ class OutgoingMessage(models.Model):
 
     def current_message(self):
         if self.message is not None and self.message.startswith('secret:'):
-            return decrypt_value(self.message)
+            return u'{}'.format(decrypt_value(self.message).decode('utf-8'))
 
         return self.message
 
