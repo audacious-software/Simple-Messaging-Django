@@ -64,8 +64,11 @@ class OutgoingMessage(models.Model):
     transmission_metadata = models.TextField(blank=True, null=True)
     message_metadata = models.TextField(blank=True, null=True)
 
-    def fetch_message(self, metadata): # pylint: disable=dangerous-default-value
+    def fetch_message(self, metadata=None): # pylint: disable=dangerous-default-value
         current_message = self.current_message()
+
+        if metadata is None:
+            metadata = {}
 
         tokens = current_message.replace('\n', ' ').replace('\r', ' ').split(' ')
 
