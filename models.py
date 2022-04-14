@@ -71,8 +71,6 @@ class OutgoingMessage(models.Model):
 
         tokens.sort(key=lambda token: len(token), reverse=True) # pylint: disable=unnecessary-lambda
 
-        print('TOKENS: %s' % tokens)
-
         for token in tokens: # pylint: disable=too-many-nested-blocks
             if token.lower().startswith('http://') or token.lower().startswith('https://'):
                 short_url = None
@@ -123,7 +121,7 @@ class OutgoingMessage(models.Model):
 
     def current_message(self):
         if self.message is not None and self.message.startswith('secret:'):
-            return u'{}'.format(decrypt_value(self.message).decode('utf-8'))
+            return u'{}'.format(decrypt_value(self.message).decode('utf-8')) # pylint: disable=redundant-u-string-prefix
 
         return self.message
 
