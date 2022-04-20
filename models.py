@@ -65,12 +65,16 @@ class OutgoingMessage(models.Model):
     message_metadata = models.TextField(blank=True, null=True)
 
     def fetch_message(self, metadata=None): # pylint: disable=dangerous-default-value
+        tokens = self.current_message().split(' ')
+
+        current_message = self.current_message()
+
         if metadata is None:
             metadata = {}
 
-        tokens = self.current_message().split(' ')
+        tokens = current_message.replace('\n', ' ').replace('\r', ' ').split(' ')
 
-        new_tokens = []
+        tokens.sort(key=lambda token: len(token), reverse=True) # pylint: disable=unnecessary-lambda
 
         for token in tokens: # pylint: disable=too-many-nested-blocks
             if token.lower().startswith('http://') or token.lower().startswith('https://'):
@@ -89,13 +93,10 @@ class OutgoingMessage(models.Model):
                             pass
 
                 if short_url is not None:
-                    new_tokens.append(short_url)
-                else:
-                    new_tokens.append(long_url)
-            else:
-                new_tokens.append(token)
+                    while long_url in current_message:
+                        current_message = current_message.replace(long_url, short_url)
 
-        self.message = ' '.join(new_tokens)
+        self.message = current_message
         self.save()
 
         return self.message
@@ -125,7 +126,7 @@ class OutgoingMessage(models.Model):
 
     def current_message(self):
         if self.message is not None and self.message.startswith('secret:'):
-            return decrypt_value(self.message)
+            return u'{}'.format(decrypt_value(self.message).decode('utf-8')) # pylint: disable=redundant-u-string-prefix
 
         return self.message
 

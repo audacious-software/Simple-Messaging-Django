@@ -54,7 +54,7 @@ def simple_messaging_ui(request):
     return render(request, 'simple_messaging_ui.html', context)
 
 @staff_member_required
-def simple_messaging_messages_json(request):
+def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
     messages = []
 
     if request.method == 'POST':
@@ -80,7 +80,6 @@ def simple_messaging_messages_json(request):
             phone = real_phone
 
         try:
-
             parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
 
             destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
@@ -102,6 +101,17 @@ def simple_messaging_messages_json(request):
                         'message': message.current_message(),
                         'timestamp': arrow.get(message.sent_date).float_timestamp
                     })
+
+            for app in settings.INSTALLED_APPS:
+                try:
+                    message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                    message_module.update_last_console_view(phone)
+                except ImportError:
+                    pass
+                except AttributeError:
+                    pass
+
         except phonenumbers.NumberParseException:
             pass
 
