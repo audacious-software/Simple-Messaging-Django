@@ -113,19 +113,20 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
 
             for source in data_sources:
                 if source in source_messages:
-                    source_messages[sender].sort(key=lambda message: message['timestamp'])
+                    if sender in source_messages:
+                        source_messages[sender].sort(key=lambda message: message['timestamp'])
 
-                    for message in source_messages[sender]:
-                        row = []
+                        for message in source_messages[sender]:
+                            row = []
 
-                        row.append(message['sender'])
-                        row.append(message['recipient'])
-                        row.append(message['timestamp'])
-                        row.append(message['direction'])
-                        row.append(message['message'])
-                        row.append(str(message['error']))
+                            row.append(message['sender'])
+                            row.append(message['recipient'])
+                            row.append(message['timestamp'])
+                            row.append(message['direction'])
+                            row.append(message['message'])
+                            row.append(str(message['error']))
 
-                        writer.writerow(row)
+                            writer.writerow(row)
 
         return filename
 
