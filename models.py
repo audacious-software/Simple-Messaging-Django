@@ -126,7 +126,10 @@ class OutgoingMessage(models.Model):
 
     def current_message(self):
         if self.message is not None and self.message.startswith('secret:'):
-            return u'{}'.format(decrypt_value(self.message).decode('utf-8')) # pylint: disable=redundant-u-string-prefix
+            try:
+                return u'{}'.format(decrypt_value(self.message).decode('utf-8')) # pylint: disable=redundant-u-string-prefix
+            except AttributeError:
+                return decrypt_value(self.message) 
 
         return self.message
 
