@@ -118,3 +118,17 @@ def log_scheduled_event(handle):
         handle(self, *args, **options)
 
     return wrapper
+
+'''
+Catches and prints any exceptions to stdout.
+'''
+def log_exception(handle):
+    def wrapper(self, *args, **options):
+        try:
+            handle(self, *args, **options)
+        except Exception as ex:
+            traceback.print_exc()
+
+            raise ex
+
+    return wrapper
