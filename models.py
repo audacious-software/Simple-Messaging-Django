@@ -11,9 +11,20 @@ import traceback
 from nacl.secret import SecretBox
 
 from django.conf import settings
+from django.core.checks import Error, register # pylint: disable=redefined-builtin
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import smart_str
+
+@register()
+def check_data_export_parameters(app_configs, **kwargs): # pylint: disable=unused-argument
+    errors = []
+
+    if hasattr(settings, 'SIMPLE_MESSAGING_COUNTRY_CODE') is False:
+        error = Error('SIMPLE_MESSAGING_COUNTRY_CODE parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_COUNTRY_CODE.', obj=None, id='simple_messaging.E001')
+        errors.append(error)
+
+    return errors
 
 def decrypt_value(stored_text):
     try:
