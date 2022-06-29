@@ -150,12 +150,22 @@ class OutgoingMessage(models.Model):
         if self.message.startswith('secret:') is False:
             self.update_message(self.message, force=True)
 
-    def transmit(self):
+    def transmit(self): # pylint: disable=too-many-branches
         if self.sent_date is not None:
             raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.')
 
         self.sent_date = timezone.now() # Saving early to avoid accidental duplicate sends.
         self.save()
+
+        for app in settings.INSTALLED_APPS:
+            try:
+                message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                message_module.update_message_metadata(self)
+            except ImportError:
+                pass
+            except AttributeError:
+                pass
 
         try:
             processed = False
