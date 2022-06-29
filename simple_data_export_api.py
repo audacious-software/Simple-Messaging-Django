@@ -18,21 +18,21 @@ def export_data_sources(params=None):
     if params is None:
         params = {}
 
-    phone_numbers = []
+    data_sources = []
 
     for incoming in IncomingMessage.objects.all():
         sender = incoming.current_sender()
 
-        if (sender in phone_numbers) is False:
-            phone_numbers.append(sender)
+        if (sender in data_sources) is False:
+            data_sources.append(sender)
 
     for outgoing in OutgoingMessage.objects.all():
         destination = outgoing.current_destination()
 
-        if (destination in phone_numbers) is False:
-            phone_numbers.append(destination)
+        if (destination in data_sources) is False:
+            data_sources.append(destination)
 
-    return phone_numbers
+    return data_sources
 
 def export_data_types():
     return [
@@ -113,20 +113,19 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
 
             for source in data_sources:
                 if source in source_messages:
-                    if sender in source_messages:
-                        source_messages[sender].sort(key=lambda message: message['timestamp'])
+                    source_messages[source].sort(key=lambda message: message['timestamp'])
 
-                        for message in source_messages[sender]:
-                            row = []
+                    for message in source_messages[source]:
+                        row = []
 
-                            row.append(message['sender'])
-                            row.append(message['recipient'])
-                            row.append(message['timestamp'])
-                            row.append(message['direction'])
-                            row.append(message['message'])
-                            row.append(str(message['error']))
+                        row.append(message['sender'])
+                        row.append(message['recipient'])
+                        row.append(message['timestamp'])
+                        row.append(message['direction'])
+                        row.append(message['message'])
+                        row.append(str(message['error']))
 
-                            writer.writerow(row)
+                        writer.writerow(row)
 
         return filename
 
