@@ -29,7 +29,7 @@ def shorten_url(long_url, tracking_code=None, metadata=None): # pylint: disable=
                 if 'url_mappings' in xmit_metadata:
                     del xmit_metadata['url_mappings']
 
-                payload['client_metadata'] = json.dumps(xmit_metadata, indent=2)
+                payload['client_metadata'] = json.dumps(xmit_metadata)
 
             if tracking_code is not None and tracking_code != '':
                 payload['tracking_code'] = tracking_code

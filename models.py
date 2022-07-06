@@ -92,12 +92,27 @@ class OutgoingMessage(models.Model):
                 short_url = None
                 long_url = token
 
+                shorten_metadata = {}
+
                 for app in settings.INSTALLED_APPS:
                     if short_url is None:
                         try:
                             shorten_module = importlib.import_module('.simple_messaging_api', package=app)
 
-                            short_url = shorten_module.shorten_url(long_url, metadata=metadata)
+                            shorten_metadata.update(shorten_module.fetch_short_url_metadata(self))
+                        except ImportError:
+                            pass
+                        except AttributeError:
+                            pass
+
+                for app in settings.INSTALLED_APPS:
+                    if short_url is None:
+                        try:
+                            shorten_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                            shorten_metadata.update(metadata)
+
+                            short_url = shorten_module.shorten_url(long_url, metadata=shorten_metadata)
                         except ImportError:
                             pass
                         except AttributeError:
