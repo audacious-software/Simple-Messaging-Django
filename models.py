@@ -87,23 +87,22 @@ class OutgoingMessage(models.Model):
 
         tokens.sort(key=lambda token: len(token), reverse=True) # pylint: disable=unnecessary-lambda
 
+        shorten_metadata = {}
+
         for token in tokens: # pylint: disable=too-many-nested-blocks
             if token.lower().startswith('http://') or token.lower().startswith('https://'):
                 short_url = None
                 long_url = token
 
-                shorten_metadata = {}
-
                 for app in settings.INSTALLED_APPS:
-                    if short_url is None:
-                        try:
-                            shorten_module = importlib.import_module('.simple_messaging_api', package=app)
+                    try:
+                        shorten_module = importlib.import_module('.simple_messaging_api', package=app)
 
-                            shorten_metadata.update(shorten_module.fetch_short_url_metadata(self))
-                        except ImportError:
-                            pass
-                        except AttributeError:
-                            pass
+                        shorten_metadata.update(shorten_module.fetch_short_url_metadata(self))
+                    except ImportError:
+                        pass
+                    except AttributeError:
+                        pass
 
                 for app in settings.INSTALLED_APPS:
                     if short_url is None:
@@ -122,6 +121,14 @@ class OutgoingMessage(models.Model):
                     while long_url in current_message:
                         current_message = current_message.replace(long_url, short_url)
 
+        xmit_metadata = {}
+
+        if self.transmission_metadata is not None and self.transmission_metadata != '':
+            xmit_metadata = json.loads(self.transmission_metadata)
+
+        xmit_metadata.update(shorten_metadata)
+
+        self.transmission_metadata = json.dumps(xmit_metadata, indent=2)
         self.message = current_message
         self.save()
 
