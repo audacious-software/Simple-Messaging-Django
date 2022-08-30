@@ -34,7 +34,7 @@ def shorten_url(long_url, tracking_code=None, metadata=None): # pylint: disable=
             if tracking_code is not None and tracking_code != '':
                 payload['tracking_code'] = tracking_code
 
-            fetch_request = requests.post(settings.SHORT_URL_CREATE_URL, data=payload)
+            fetch_request = requests.post(settings.SHORT_URL_CREATE_URL, data=payload, timeout=120)
 
             if fetch_request.status_code >= 200 and fetch_request.status_code < 300:
                 short_url = fetch_request.json()['short_url']
@@ -55,7 +55,7 @@ def shorten_url(long_url, tracking_code=None, metadata=None): # pylint: disable=
 
             fetch_url = 'https://api-ssl.bitly.com/v4/shorten'
 
-            fetch_request = requests.post(fetch_url, headers=headers, json=post_data)
+            fetch_request = requests.post(fetch_url, headers=headers, json=post_data, timeout=120)
 
             if fetch_request.status_code >= 200 and fetch_request.status_code < 300:
                 short_url = fetch_request.json()['link']

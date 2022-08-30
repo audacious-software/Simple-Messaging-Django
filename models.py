@@ -41,7 +41,7 @@ def check_media_upload_protected(app_configs, **kwargs): # pylint: disable=unuse
     http_url = 'https://' + settings.ALLOWED_HOSTS[0] + settings.MEDIA_URL + SIMPLE_MESSAGING_MEDIA_FILE_FOLDER
 
     try:
-        response = requests.get(http_url)
+        response = requests.get(http_url, timeout=300)
 
         if (response.status_code >= 200 and response.status_code < 400) and len(response.text) > 0: # pylint: disable=len-as-condition
             error = Error('Incoming media folder is readable over HTTP', hint='Update webserver configuration to deny read access (' + http_url + ') via HTTP(S).', obj=None, id='simple_messaging.E002')
