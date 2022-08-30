@@ -14,7 +14,7 @@ import requests
 from nacl.secret import SecretBox
 
 from django.conf import settings
-from django.core.checks import Error, register # pylint: disable=redefined-builtin
+from django.core.checks import Error, Warning, register # pylint: disable=redefined-builtin
 from django.db import models
 from django.utils import timezone
 from django.utils.encoding import smart_str
