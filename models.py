@@ -6,7 +6,10 @@ from __future__ import unicode_literals, print_function
 import base64
 import importlib
 import json
+import os
 import traceback
+
+import requests
 
 from nacl.secret import SecretBox
 
@@ -16,12 +19,50 @@ from django.db import models
 from django.utils import timezone
 from django.utils.encoding import smart_str
 
+SIMPLE_MESSAGING_MEDIA_FILE_FOLDER = 'incoming_message_media'
+
 @register()
 def check_data_export_parameters(app_configs, **kwargs): # pylint: disable=unused-argument
     errors = []
 
     if hasattr(settings, 'SIMPLE_MESSAGING_COUNTRY_CODE') is False:
         error = Error('SIMPLE_MESSAGING_COUNTRY_CODE parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_COUNTRY_CODE.', obj=None, id='simple_messaging.E001')
+        errors.append(error)
+
+    return errors
+
+@register()
+def check_media_upload_protected(app_configs, **kwargs): # pylint: disable=unused-argument
+    errors = []
+
+    if 'simple_messaging.W002' in settings.SILENCED_SYSTEM_CHECKS or 'simple_messaging.E002' in settings.SILENCED_SYSTEM_CHECKS:
+        return errors
+
+    http_url = 'https://' + settings.ALLOWED_HOSTS[0] + settings.MEDIA_URL + SIMPLE_MESSAGING_MEDIA_FILE_FOLDER
+
+    try:
+        response = requests.get(http_url)
+
+        if (response.status_code >= 200 and response.status_code < 400) and len(response.text) > 0: # pylint: disable=len-as-condition
+            error = Error('Incoming media folder is readable over HTTP', hint='Update webserver configuration to deny read access (' + http_url + ') via HTTP(S).', obj=None, id='simple_messaging.E002')
+
+            errors.append(error)
+    except: # pylint: disable=bare-except
+        warning = Warning('Unable to connect to %s' % http_url, hint='Verify that the webserver is properly configured.', obj=None, id='simple_messaging.W002') # pylint: disable=consider-using-f-string
+
+        errors.append(warning)
+
+    return errors
+
+@register()
+def check_media_upload_available(app_configs, **kwargs): # pylint: disable=unused-argument
+    errors = []
+
+    folder_path = os.path.join(settings.MEDIA_ROOT, SIMPLE_MESSAGING_MEDIA_FILE_FOLDER)
+
+    if os.path.exists(folder_path) is False:
+        error = Error('Raw incoming folder is missing', hint='Verify that the folder for media files (' + folder_path + ') is present on the local filesystem.', obj=None, id='simple_messaging.E003')
+
         errors.append(error)
 
     return errors
