@@ -12,6 +12,7 @@
         <script src="https://code.jquery.com/jquery-3.6.0.min.js" integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
         <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+	    <script src="{% static 'simple_messaging/js/simple_messaging_ui.js' %}"></script>
         <style>
             .container {
                 max-width: 960px;
@@ -22,8 +23,14 @@
         {% csrf_token %}
         <div class="container">
             <div class="row">
-                <div class="col-md-12 pb-3 mt-3">
+                <div class="col-md-9 pb-3 mt-3">
                     <h4>Message Console</h4>
+                </div>
+                <div class="col-md-3 pb-3 mt-3">
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="phone_number" placeholder="Identifier" aria-label="Identifier" aria-describedby="phone-addon">
+                        <span class="input-group-text material-icons" id="phone-addon">person</span>
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -32,236 +39,45 @@
 
                     </div>
                 </div>
-                <div class="col-md-3 mb-3">
-                    <div class="input-group">
-                        <span class="input-group-text material-icons" id="phone-addon">person</span>
-                        <input type="text" class="form-control" id="phone_number" placeholder="Identifier" aria-label="Identifier" aria-describedby="phone-addon">
-                    </div>
-                </div>
-
-                <div class="col-md-9 mb-3">
-                    <div class="input-group">
-                        {% if precomposed %}
-                            <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">TXT</button>
-                            <ul class="dropdown-menu">
-                                {% for message in precomposed %}
-                                    <li><a class="dropdown-item precomposed-message" href="#" data-message="{{ message.1 }}">{{ message.0 }}</a></li>
-                                {% endfor %}
-                            </ul>
-                        {% endif %}
-                        <input type="text" class="form-control" id="message" placeholder="Message" aria-label="Message">
-                        <button class="btn btn-outline-secondary material-icons" id="send_button" type="button">send</button>
-                    </div>
+                <div class="col-md-12 mb-3 d-flex">
+					<div class="input-group flex-grow-1">
+						<textarea id="message" placeholder="Message" aria-label="Message" class="form-control" rows="2"></textarea>
+					</div>
+					<div class="flex-grow-0 ps-3">
+						<div class="input-group" style="width: 100px;">
+							{% if media_enabled %}
+								<button class="btn btn-outline-secondary material-icons" id="upload_button" type="button">backup</button>
+								<input type="file" id="attachment" class="d-none">
+							{% endif %}
+							{% if precomposed %}
+								<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">TXT</button>
+								<ul class="dropdown-menu">
+									{% for message in precomposed %}
+										<li><a class="dropdown-item precomposed-message" href="#" data-message="{{ message.1 }}">{{ message.0 }}</a></li>
+									{% endfor %}
+								</ul>
+							{% endif %}
+							<button class="btn btn-outline-secondary material-icons" id="send_button" type="button">send</button>
+						</div>
+						<div class="mt-2">
+							<small>
+								<strong id="character_count">(Count Here)</strong>
+							</small>
+						</div>
+	                </div>
                 </div>
             </div>
         </div>
     </body>
     <script>
-        $(document).ready(function() {
-            var csrftoken = $("[name=csrfmiddlewaretoken]").val();
-
-            function csrfSafeMethod(method) {
-                return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-            }
-
-            $.ajaxSetup({
-                beforeSend: function(xhr, settings) {
-                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                    }
-                }
-            });
-
-            const cachedMessages = {};
-
-            const loadMessages = function(messages) {
-                $.each(messages, function(index, message) {
-                    let itemHtml = '';
-
-                    let formattedTime = moment(message['timestamp'] * 1000).format('MMMM Do YYYY, h:mm:ss a');
-
-                    if (message['direction'] == "from-user") {
-                        itemHtml += '<div class="row mt-3">';
-                        itemHtml += '    <div class="col-md-8">';
-                        itemHtml += '      <div class="card text-white bg-secondary">';
-                        itemHtml += '        <div class="card-body">';
-                        itemHtml += '          <p class="card-text">' + message['message'] + '</p>';
-                        itemHtml += '          <small>' + formattedTime + '</small>';
-                        itemHtml += '        </div>';
-                        itemHtml += '      </div>';
-                        itemHtml += '    </div>';
-                        itemHtml += '    <div class="col-md-4">';
-                        itemHtml += '    </div>';
-                        itemHtml += '  </div>';
-                        itemHtml += '</div>';
-                    } else {
-                        itemHtml += '<div class="row mt-3">';
-                        itemHtml += '    <div class="col-md-4">';
-                        itemHtml += '    </div>';
-                        itemHtml += '    <div class="col-md-8">';
-                        itemHtml += '      <div class="card text-white bg-primary">';
-                        itemHtml += '        <div class="card-body">';
-                        itemHtml += '          <p class="card-text">' + message['message'] + '</p>';
-                        itemHtml += '          <small>' + formattedTime + '</small>';
-                        itemHtml += '        </div>';
-                        itemHtml += '      </div>';
-                        itemHtml += '    </div>';
-                        itemHtml += '  </div>';
-                        itemHtml += '</div>';
-                    }
-
-                    $("#message_box").append(itemHtml);
-                });
-
-                if (messages.length > 0) {
-                    $('#message_box').scrollTop($('#message_box')[0].scrollHeight);
-                };
-            };
-
-            const fetchMessages = function(phone, success) {
-                let payload = {
-                    "phone": phone
-                };
-
-                if (cachedMessages[phone] != undefined) {
-                    const messages = cachedMessages[phone];
-
-                    if (messages.length > 0) {
-                        payload["since"] = messages[messages.length - 1]["timestamp"];
-                    }
-                }
-
-                $.post("{% url 'simple_messaging_messages_json' %}", payload, function(data) {
-                    if (cachedMessages[phone] == undefined) {
-                        cachedMessages[phone] = [];
-                    }
-
-                    cachedMessages[phone] = cachedMessages[phone].concat(data);
-
-                    let cacheSize = cachedMessages[phone].length
-
-                    if (cacheSize > 1) {
-                        while (cachedMessages[phone][cacheSize - 1] == cachedMessages[phone][cacheSize - 2]) {
-                            cachedMessages[phone].pop()
-
-                            cacheSize = cachedMessages[phone].length
-                        }
-                    }
-
-                    data.sort(function(a, b){
-                        return a['timestamp'] - b['timestamp'];
-                    });
-
-                    cachedMessages[phone].sort(function(a, b){
-                        return a['timestamp'] - b['timestamp'];
-                    });
-
-                    loadMessages(data);
-
-                    success()
-                });
-            };
-
-            {% if identifier %}
-                let lastPhone = "{{ identifier }}";
-            {% else %}
-                {% if request.session.simple_messaging_ui_last_phonenumber %}
-                    let lastPhone = "{{ request.session.simple_messaging_ui_last_phonenumber }}";
-                {% else %}
-                    let lastPhone = "";
-                {% endif %}
-            {% endif %}
-
-            let refreshIDs = []
-
-            const refresh = function() {
-                if (lastPhone.length >= 0) {
-                    fetchMessages(lastPhone, function() {
-                        while (refreshIDs.length > 0) {
-                            let refreshID = refreshIDs.pop()
-
-                            window.clearTimeout(refreshID);
-                        }
-
-                        refreshIDs.push(window.setTimeout(refresh, 5000));
-                    });
-                }
-            };
-
-            $("#message_box").height($(window).height() - 200);
-
-            const toggleSend = function() {
-                const phone = $("#phone_number").val();
-                const message = $("#message").val().trim();
-
-                if (message.length == 0 || phone.length == 0) {
-                    $("#send_button").prop('disabled', true);
-                } else {
-                    $("#send_button").prop('disabled', false);
-                }
-            };
-
-            let lastNumberChange = Date.now()
-
-            $("#phone_number").on("keyup change", function(e) {
-                let phone = $("#phone_number").val()
-
-                if (phone != lastPhone) {
-                    $("#message_box").html("");
-                    lastPhone = phone;
-
-                    if (cachedMessages[phone] != undefined) {
-                        loadMessages(cachedMessages[phone]);
-                    } else {
-                        refresh()
-                    }
-
-                    lastPhone = phone
-                }
-
-                toggleSend();
-            });
-
-            $("#message").on("keyup change", function(event) {
-                toggleSend();
-
-                if (event.key == "Enter") {
-                    $("#send_button").click()
-                }
-            });
-
-            $("#send_button").click(function(eventObj) {
-                eventObj.preventDefault();
-
-                const message = $("#message").val().trim();
-                let phone = $("#phone_number").val() // .replace(/[^\d]/g, '');
-
-                let payload = {
-                    "phone": phone,
-                    "message": message
-                };
-
-                $.post("{% url 'simple_messaging_send_json' %}", payload, function(data) {
-                    $("#message").val("");
-                    fetchMessages(phone, function() {});
-                });
-            });
-
-            if (lastPhone != "") {
-                $("#phone_number").val(lastPhone);
-
-                lastPhone = ''
-
-                $("#phone_number").change()
-            }
-
-            $(".precomposed-message").click(function(eventObj) {
-                eventObj.preventDefault()
-
-                $("#message").val($(this).attr("data-message"))
-
-                toggleSend();
-            })
-        });
-    </script>
+		{% if identifier %}
+			window.lastPhone = "{{ identifier }}"
+		{% else %}
+			{% if request.session.simple_messaging_ui_last_phonenumber %}
+				window.lastPhone = "{{ request.session.simple_messaging_ui_last_phonenumber }}"
+			{% else %}
+				window.lastPhone = "";
+			{% endif %}
+		{% endif %}
+	</script>
 </html>

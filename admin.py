@@ -8,7 +8,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.utils import timezone
 
-from .models import OutgoingMessage, IncomingMessage, IncomingMessageMedia
+from .models import OutgoingMessage, OutgoingMessageMedia, IncomingMessage, IncomingMessageMedia
 
 def reset_resend_messages(modeladmin, request, queryset): # pylint: disable=unused-argument
     for message in queryset:
@@ -68,7 +68,13 @@ class IncomingMessageAdmin(admin.ModelAdmin):
     list_filter = ('receive_date',)
 
 @admin.register(IncomingMessageMedia)
-class Admin(admin.ModelAdmin):
+class IncomingMessageMediaAdmin(admin.ModelAdmin):
     list_display = ('message', 'index', 'content_url', 'content_type')
+    search_fields = ('content_url', 'content_type',)
+    list_filter = ('content_type',)
+
+@admin.register(OutgoingMessageMedia)
+class OutgoingMessageMediaAdmin(admin.ModelAdmin):
+    list_display = ('message', 'index', 'content_type')
     search_fields = ('content_url', 'content_type',)
     list_filter = ('content_type',)

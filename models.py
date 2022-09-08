@@ -19,7 +19,8 @@ from django.db import models
 from django.utils import timezone
 from django.utils.encoding import smart_str
 
-SIMPLE_MESSAGING_MEDIA_FILE_FOLDER = 'incoming_message_media'
+SIMPLE_MESSAGING_INCOMING_MEDIA_FILE_FOLDER = 'incoming_message_media'
+SIMPLE_MESSAGING_OUTGOING_MEDIA_FILE_FOLDER = 'outgoing_message_media'
 
 @register()
 def check_data_export_parameters(app_configs, **kwargs): # pylint: disable=unused-argument
@@ -38,7 +39,7 @@ def check_media_upload_protected(app_configs, **kwargs): # pylint: disable=unuse
     if 'simple_messaging.W002' in settings.SILENCED_SYSTEM_CHECKS or 'simple_messaging.E002' in settings.SILENCED_SYSTEM_CHECKS:
         return errors
 
-    http_url = 'https://' + settings.ALLOWED_HOSTS[0] + settings.MEDIA_URL + SIMPLE_MESSAGING_MEDIA_FILE_FOLDER
+    http_url = 'https://' + settings.ALLOWED_HOSTS[0] + settings.MEDIA_URL + SIMPLE_MESSAGING_INCOMING_MEDIA_FILE_FOLDER
 
     try:
         response = requests.get(http_url, timeout=300)
@@ -52,16 +53,37 @@ def check_media_upload_protected(app_configs, **kwargs): # pylint: disable=unuse
 
         errors.append(warning)
 
+    http_url = 'https://' + settings.ALLOWED_HOSTS[0] + settings.MEDIA_URL + SIMPLE_MESSAGING_OUTGOING_MEDIA_FILE_FOLDER
+
+    try:
+        response = requests.get(http_url, timeout=300)
+
+        if (response.status_code >= 200 and response.status_code < 400) and len(response.text) > 0: # pylint: disable=len-as-condition
+            error = Error('Outgoing media folder is readable over HTTP', hint='Update webserver configuration to deny read access (' + http_url + ') via HTTP(S).', obj=None, id='simple_messaging.E002')
+
+            errors.append(error)
+    except: # pylint: disable=bare-except
+        warning = Warning('Unable to connect to %s' % http_url, hint='Verify that the webserver is properly configured.', obj=None, id='simple_messaging.W002') # pylint: disable=consider-using-f-string
+
+        errors.append(warning)
+
     return errors
 
 @register()
 def check_media_upload_available(app_configs, **kwargs): # pylint: disable=unused-argument
     errors = []
 
-    folder_path = os.path.join(settings.MEDIA_ROOT, SIMPLE_MESSAGING_MEDIA_FILE_FOLDER)
+    folder_path = os.path.join(settings.MEDIA_ROOT, SIMPLE_MESSAGING_INCOMING_MEDIA_FILE_FOLDER)
 
     if os.path.exists(folder_path) is False:
         error = Error('Raw incoming folder is missing', hint='Verify that the folder for media files (' + folder_path + ') is present on the local filesystem.', obj=None, id='simple_messaging.E003')
+
+        errors.append(error)
+
+    folder_path = os.path.join(settings.MEDIA_ROOT, SIMPLE_MESSAGING_OUTGOING_MEDIA_FILE_FOLDER)
+
+    if os.path.exists(folder_path) is False:
+        error = Error('Raw outgoing folder is missing', hint='Verify that the folder for media files (' + folder_path + ') is present on the local filesystem.', obj=None, id='simple_messaging.E003')
 
         errors.append(error)
 
@@ -294,6 +316,25 @@ class OutgoingMessage(models.Model):
 
             self.save()
 
+    def media_urls(self):
+        urls = []
+
+        for media_file in self.media.all().order_by('index'):
+            try:
+                urls.append(('%s%s' % (settings.SITE_URL, media_file.content_file.url), media_file.content_type))
+            except ValueError:
+                pass
+
+        return urls
+
+class OutgoingMessageMedia(models.Model):
+    message = models.ForeignKey(OutgoingMessage, related_name='media', on_delete=models.CASCADE)
+
+    index = models.IntegerField(default=0)
+
+    content_file = models.FileField(upload_to='outgoing_message_media', null=True, blank=True)
+    content_type = models.CharField(max_length=128, default='application/octet-stream')
+
 class IncomingMessage(models.Model):
     sender = models.CharField(max_length=256)
     recipient = models.CharField(max_length=256)
@@ -349,6 +390,17 @@ class IncomingMessage(models.Model):
     def encrypt_sender(self):
         if self.sender.startswith('secret:') is False:
             self.update_sender(self.sender, force=True)
+
+    def media_urls(self):
+        urls = []
+
+        for media_file in self.media.all().order_by('index'):
+            try:
+                urls.append(('%s%s' % (settings.SITE_URL, media_file.content_file.url), media_file.content_type))
+            except ValueError:
+                pass
+
+        return urls
 
 class IncomingMessageMedia(models.Model):
     message = models.ForeignKey(IncomingMessage, related_name='media', on_delete=models.CASCADE)
