@@ -175,17 +175,17 @@ def simple_messaging_send_json(request): # pylint: disable=too-many-locals
 
         index_counter = 0
 
-        for file in outgoing_files:
+        for outgoing_file in outgoing_files:
             media = OutgoingMessageMedia(message=outgoing)
 
-            media.content_type = file.content_type
+            media.content_type = outgoing_file.content_type
             media.index = index_counter
 
             media.save()
 
             index_counter += 1
 
-            media.content_file.save(file.name, file)
+            media.content_file.save(outgoing_file.name, outgoing_file)
 
         call_command('simple_messaging_send_pending_messages')
 
