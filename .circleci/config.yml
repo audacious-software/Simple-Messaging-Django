@@ -26,7 +26,7 @@ jobs:
       - node/install
       - checkout
       - restore_cache:
-          key: venv-38-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          key: venv-38-{{ .Branch }}-{{ checksum "requirements.txt" }}-1
       - run:
           name: Validate Javascript code
           command: |
@@ -36,7 +36,7 @@ jobs:
           name: Build and validate
           command: |
             sudo apt-get update && sudo apt-get install -y gdal-bin
-            python3 -m venv /home/circleci/venv
+            python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt --progress-bar off
@@ -60,7 +60,7 @@ jobs:
             pylint simple_messaging
             bandit -r .      
       - save_cache:
-          key: venv-38-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
+          key: venv-38-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}-1
           paths:
             - "/home/circleci/venv"
       - store_test_results:
@@ -84,7 +84,7 @@ jobs:
       - node/install
       - checkout
       - restore_cache:
-          key: venv-27-{{ .Branch }}-{{ checksum "requirements.txt" }}
+          key: venv-27-{{ .Branch }}-{{ checksum "requirements.txt" }}-1
       - run:
           name: Validate Javascript code
           command: |
@@ -94,7 +94,7 @@ jobs:
           name: Build and validate
           command: |
             sudo apt-get update && sudo apt-get install -y gdal-bin
-            virtualenv /home/circleci/venv
+            virtualenv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
             pip install --upgrade pip
             pip install -r requirements.txt --progress-bar off
@@ -118,7 +118,7 @@ jobs:
             pylint simple_messaging
             bandit -r .      
       - save_cache:
-          key: venv-27-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
+          key: venv-27-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}-1
           paths:
             - "/home/circleci/venv"
       - store_test_results:
