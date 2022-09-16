@@ -109,15 +109,13 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
                     })
 
             for message in OutgoingMessage.objects.filter(sent_date__gt=start_time):
-                media_urls = message.media_urls()
-
                 if message.current_destination() == destination:
                     messages.append({
                         'direction': 'from-system',
                         'recipient': destination,
                         'message': message.current_message(),
                         'timestamp': arrow.get(message.sent_date).float_timestamp,
-                        'media_urls': media_urls,
+                        'media_urls': message.media_urls(),
                     })
 
             for app in settings.INSTALLED_APPS:
