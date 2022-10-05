@@ -22,7 +22,10 @@ def incoming_message_request(request):
         try:
             response_module = importlib.import_module('.simple_messaging_api', package=app)
 
-            return response_module.process_incoming_request(request)
+            response = response_module.process_incoming_request(request)
+
+            if response is not None:
+                return response
         except ImportError:
             pass
         except AttributeError:
