@@ -56,7 +56,7 @@ def simple_messaging_ui(request):
         try:
             response_module = importlib.import_module('.simple_messaging_api', package=app)
 
-            if response_module.simple_messaging_media_enabled():
+            if response_module.simple_messaging_media_enabled(None):
                 context['media_enabled'] = True
         except ImportError:
             pass
