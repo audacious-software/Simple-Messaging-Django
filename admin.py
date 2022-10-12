@@ -60,7 +60,7 @@ class OutgoingMessageAdmin(admin.ModelAdmin):
     def get_search_results(self, request, queryset, search_term):
         original_query_set = queryset
 
-        queryset, may_have_duplicates = super(OutgoingMessageAdmin, self).get_search_results(request, queryset, search_term,)
+        queryset, may_have_duplicates = super(OutgoingMessageAdmin, self).get_search_results(request, queryset, search_term,) # pylint:disable=super-with-arguments
 
         if search_term is None or search_term == '':
             return queryset, may_have_duplicates
@@ -84,7 +84,7 @@ class IncomingMessageAdmin(admin.ModelAdmin):
     def get_search_results(self, request, queryset, search_term):
         original_query_set = queryset
 
-        queryset, may_have_duplicates = super(IncomingMessageAdmin, self).get_search_results(request, queryset, search_term,)
+        queryset, may_have_duplicates = super(IncomingMessageAdmin, self).get_search_results(request, queryset, search_term,) # pylint:disable=super-with-arguments
 
         if search_term is None or search_term == '':
             return queryset, may_have_duplicates
