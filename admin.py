@@ -57,6 +57,20 @@ class OutgoingMessageAdmin(admin.ModelAdmin):
     list_filter = ('errored', 'send_date', 'sent_date',)
     actions = [reset_resend_messages, mark_error_handled]
 
+    def get_search_results(self, request, queryset, search_term):
+        original_query_set = queryset
+
+        queryset, may_have_duplicates = super(OutgoingMessageAdmin, self).get_search_results(request, queryset, search_term,)
+
+        if search_term is None or search_term == '':
+            return queryset, may_have_duplicates
+
+        for message in original_query_set:
+            if search_term in message.current_destination():
+                queryset = queryset | self.model.objects.filter(destination=message.destination)
+
+        return queryset, may_have_duplicates
+
 @admin.register(IncomingMessage)
 class IncomingMessageAdmin(admin.ModelAdmin):
     if hasattr(settings, 'SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES') and settings.SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES:
@@ -66,6 +80,20 @@ class IncomingMessageAdmin(admin.ModelAdmin):
 
     search_fields = ('sender', 'message',)
     list_filter = ('receive_date',)
+
+    def get_search_results(self, request, queryset, search_term):
+        original_query_set = queryset
+
+        queryset, may_have_duplicates = super(IncomingMessageAdmin, self).get_search_results(request, queryset, search_term,)
+
+        if search_term is None or search_term == '':
+            return queryset, may_have_duplicates
+
+        for message in original_query_set:
+            if search_term in message.current_sender():
+                queryset = queryset | self.model.objects.filter(sender=message.sender)
+
+        return queryset, may_have_duplicates
 
 @admin.register(IncomingMessageMedia)
 class IncomingMessageMediaAdmin(admin.ModelAdmin):
