@@ -22,7 +22,10 @@ def incoming_message_request(request):
         try:
             response_module = importlib.import_module('.simple_messaging_api', package=app)
 
-            return response_module.process_incoming_request(request)
+            response = response_module.process_incoming_request(request)
+
+            if response is not None:
+                return response
         except ImportError:
             pass
         except AttributeError:
@@ -53,7 +56,7 @@ def simple_messaging_ui(request):
         try:
             response_module = importlib.import_module('.simple_messaging_api', package=app)
 
-            if response_module.simple_messaging_media_enabled():
+            if response_module.simple_messaging_media_enabled(None):
                 context['media_enabled'] = True
         except ImportError:
             pass
