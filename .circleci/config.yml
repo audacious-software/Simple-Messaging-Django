@@ -88,6 +88,8 @@ jobs:
       - run:
           name: Validate Javascript code
           command: |
+            nvm install 17.9.1
+            nvm use 17.9.1
             npm install
             npx eslint static/simple_messaging/js/
       - run:
