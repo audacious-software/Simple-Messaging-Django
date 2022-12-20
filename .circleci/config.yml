@@ -8,6 +8,7 @@ workflows:
   build:
     jobs:
       - build-38
+      - build-36
       - build-27
 
 jobs:
