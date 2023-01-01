@@ -9,9 +9,11 @@ import json
 import os
 import traceback
 
+import pytz
 import requests
 
 from nacl.secret import SecretBox
+from six import python_2_unicode_compatible
 
 from django.conf import settings
 from django.core.checks import Error, Warning, register # pylint: disable=redefined-builtin
@@ -123,6 +125,7 @@ def encrypt_value(cleartext):
 
     return None
 
+@python_2_unicode_compatible
 class OutgoingMessage(models.Model):
     destination = models.CharField(max_length=256)
 
@@ -137,6 +140,15 @@ class OutgoingMessage(models.Model):
 
     transmission_metadata = models.TextField(blank=True, null=True)
     message_metadata = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        send_date = self.send_date.astimezone(pytz.timezone(settings.TIME_ZONE))
+        message = self.message
+
+        if len(message) > 64:
+            message = '%s%s' % (message[:64], '...')
+
+        return '%s (PK: %d, %s)' % (message, self.pk, send_date.strftime('%c'))
 
     def fetch_message(self, metadata=None): # pylint: disable=dangerous-default-value, too-many-branches
         tokens = self.current_message().split(' ')
@@ -335,6 +347,7 @@ class OutgoingMessageMedia(models.Model):
     content_file = models.FileField(upload_to='outgoing_message_media', null=True, blank=True)
     content_type = models.CharField(max_length=128, default='application/octet-stream')
 
+@python_2_unicode_compatible
 class IncomingMessage(models.Model):
     sender = models.CharField(max_length=256)
     recipient = models.CharField(max_length=256)
@@ -344,6 +357,15 @@ class IncomingMessage(models.Model):
     message = models.TextField(max_length=1024)
 
     transmission_metadata = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        receive_date = self.receive_date.astimezone(pytz.timezone(settings.TIME_ZONE))
+        message = self.message
+
+        if len(message) > 64:
+            message = '%s%s' % (message[:64], '...')
+
+        return '%s (PK: %d, %s)' % (message, self.pk, receive_date.strftime('%c'))
 
     def current_message(self):
         if self.message is not None and self.message.startswith('secret:'):
