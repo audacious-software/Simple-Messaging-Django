@@ -260,7 +260,7 @@ class OutgoingMessage(models.Model):
 
     def transmit(self): # pylint: disable=too-many-branches
         if self.sent_date is not None:
-            raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.')
+            raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.') # pylint: disable=broad-exception-raised
 
         self.sent_date = timezone.now() # Saving early to avoid accidental duplicate sends.
         self.save()
