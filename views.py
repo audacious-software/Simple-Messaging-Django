@@ -78,7 +78,7 @@ def simple_messaging_ui(request): # pylint:disable=too-many-branches
     if len(precomposed) > 0: # pylint: disable=len-as-condition
         context['precomposed'] = precomposed
 
-    if len(channels) == 0:
+    if len(channels) == 0: # pylint: disable=len-as-condition
         channels.append(['simple_messaging_ui_default', 'Default Channel'])
 
     context['channels'] = channels
