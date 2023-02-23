@@ -85,11 +85,13 @@ $(document).ready(function () {
         itemHtml += '</div>'
       }
 
-      $('#message_box').append(itemHtml)
+      $('#message_box_' + message.channel).append(itemHtml)
     })
 
     if (messages.length > 0) {
-      $('#message_box').scrollTop($('#message_box')[0].scrollHeight)
+      $('.simple_message_ui_box').each(function (element) {
+        $(element).scrollTop($(element).scrollHeight)
+      })
     };
   }
 
@@ -153,7 +155,19 @@ $(document).ready(function () {
     }
   }
 
-  $('#message_box').height($(window).height() - 240)
+  $('.simple_message_ui_box').height($(window).height() - 240)
+
+  $('.simple_message_ui_box').click(function (event) {
+    $('.simple_message_ui_box').removeClass('border-primary')
+    $('.simple_message_ui_box').removeClass('border-3')
+
+    $(this).addClass('border-primary')
+    $(this).addClass('border-3')
+
+    window.selectedMessagingChannel = $(this).attr('id').replace('message_box_', '')
+  })
+
+  $('.simple_message_ui_box')[0].click()
 
   const toggleSend = function () {
     const phone = $('#phone_number').val()
@@ -221,6 +235,7 @@ $(document).ready(function () {
 
     formData.append('phone', phone)
     formData.append('message', message)
+    formData.append('channel', window.selectedMessagingChannel)
     formData.append('attachment', attachment)
 
     $.ajax({

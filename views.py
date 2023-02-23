@@ -34,13 +34,15 @@ def incoming_message_request(request):
     raise Http404("No module found to process incoming message.")
 
 @staff_member_required
-def simple_messaging_ui(request):
+def simple_messaging_ui(request): # pylint:disable=too-many-branches
     context = {
         'identifier': request.GET.get('identifier', ''),
         'media_enabled': False,
     }
 
     precomposed = []
+
+    channels = []
 
     for app in settings.INSTALLED_APPS:
         try:
@@ -63,8 +65,36 @@ def simple_messaging_ui(request):
         except AttributeError:
             pass
 
+    for app in settings.INSTALLED_APPS:
+        try:
+            response_module = importlib.import_module('.simple_messaging_api', package=app)
+
+            channels.extend(response_module.simple_messaging_fetch_active_channels())
+        except ImportError:
+            pass
+        except AttributeError:
+            pass
+
     if len(precomposed) > 0: # pylint: disable=len-as-condition
         context['precomposed'] = precomposed
+
+    if len(channels) == 0:
+        channels.append(['simple_messaging_ui_default', 'Default Channel'])
+
+    context['channels'] = channels
+
+    if len(channels) == 1:
+        context['channel_class'] = 'col-md-12'
+    elif len(channels) == 2:
+        context['channel_class'] = 'col-md-6'
+    elif len(channels) == 3:
+        context['channel_class'] = 'col-md-4'
+    elif len(channels) == 4:
+        context['channel_class'] = 'col-md-3'
+    elif len(channels) < 7:
+        context['channel_class'] = 'col-md-2'
+    else:
+        context['channel_class'] = 'col-md-1'
 
     return render(request, 'simple_messaging_ui.html', context)
 
@@ -109,6 +139,7 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
                         'message': message.current_message(),
                         'timestamp': arrow.get(message.receive_date).float_timestamp,
                         'media_urls': media_urls,
+                        'message_id': message.pk,
                     })
 
             for message in OutgoingMessage.objects.filter(sent_date__gt=start_time):
@@ -119,6 +150,7 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
                         'message': message.current_message(),
                         'timestamp': arrow.get(message.sent_date).float_timestamp,
                         'media_urls': message.media_urls(),
+                        'message_id': message.pk,
                     })
 
             for app in settings.INSTALLED_APPS:
@@ -130,6 +162,17 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
                     pass
                 except AttributeError:
                     pass
+
+            for app in settings.INSTALLED_APPS:
+                try:
+                    message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                    message_module.annotate_console_messages(messages)
+                except ImportError:
+                    pass
+                except AttributeError:
+                    pass
+
 
         except phonenumbers.NumberParseException:
             pass
@@ -166,6 +209,14 @@ def simple_messaging_send_json(request): # pylint: disable=too-many-locals
         destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
 
         outgoing = OutgoingMessage.objects.create(destination=destination, send_date=timezone.now(), message=message)
+
+        transmission_metadata = {
+            'message_channel': request.POST.get('channel', None)
+        }
+
+        outgoing.transmission_metadata = json.dumps(transmission_metadata, indent=2)
+        outgoing.save()
+
         outgoing.encrypt_message()
         outgoing.encrypt_destination()
 
