@@ -17,14 +17,16 @@ $(document).ready(function () {
 
   const cachedMessages = {}
 
-  const loadMessages = function (messages) {
+  const loadMessages = function (messages, loadMore = false) {
+    const toScroll = []
+
     $.each(messages, function (index, message) {
       let itemHtml = ''
 
       const formattedTime = moment(message.timestamp * 1000).format('MMMM Do YYYY, h:mm:ss a')
 
       if (message.direction === 'from-user') {
-        itemHtml += '<div class="row mt-3">'
+        itemHtml += '<div class="row mt-3" data-timestamp="' + message.timestamp + '">'
         itemHtml += '    <div class="col-md-8">'
         itemHtml += '      <div class="card text-white bg-secondary">'
         itemHtml += '        <div class="card-body">'
@@ -54,7 +56,7 @@ $(document).ready(function () {
         itemHtml += '  </div>'
         itemHtml += '</div>'
       } else {
-        itemHtml += '<div class="row mt-3">'
+        itemHtml += '<div class="row mt-3"  data-timestamp="' + message.timestamp + '">'
         itemHtml += '    <div class="col-md-4">'
         itemHtml += '    </div>'
         itemHtml += '    <div class="col-md-8">'
@@ -86,26 +88,80 @@ $(document).ready(function () {
       }
 
       $('#message_box_' + message.channel).append(itemHtml)
+
+      if (toScroll.includes(message.channel) === false) {
+        toScroll.push(message.channel)
+      }
     })
 
-    if (messages.length > 0) {
-      $('.simple_message_ui_box').each(function (element) {
-        $(element).scrollTop($(element).scrollHeight)
+    toScroll.forEach(function (channel) {
+      if (loadMore) {
+        let itemHtml = ''
+
+        itemHtml += '<div class="row mt-3 messages_load_more" data-timestamp="0">'
+        itemHtml += '  <div class="col-md-12" style="padding-bottom: 16px;">'
+        itemHtml += '    <center>'
+        itemHtml += '      <button class="btn btn-dark button_load_messages" type="button">'
+        itemHtml += '        <span class="spinner-grow spinner-grow-sm loading_spinner" role="status" aria-hidden="true"></span>'
+        itemHtml += '        <span class="sr-only loading_message">Load older messages</span>'
+        itemHtml += '      </button>'
+        itemHtml += '    <center>'
+        itemHtml += '  </div>'
+        itemHtml += '</div>'
+
+        $('#message_box_' + channel).append(itemHtml)
+        $('.loading_spinner').hide()
+
+        $('.button_load_messages').click(function (event) {
+          event.preventDefault()
+
+          $('.loading_message').html('Loading older messages&#8230;')
+          $('.loading_spinner').show()
+
+          fetchMessages(window.lastPhone, function () {
+            $('.messages_load_more').hide()
+          }, -1)
+        })
+      }
+
+      const messageBox = $('#message_box_' + channel)
+
+      const messageElements = messageBox.find('div[data-timestamp]')
+
+      messageElements.sort(function (one, two) {
+        return parseFloat($(one).data('timestamp')) - parseFloat($(two).data('timestamp'))
+      }).each(function () {
+        messageBox.append(this)
       })
-    };
+
+      $('#message_box_' + channel).each(function (index, element) {
+        $(element).scrollTop(element.scrollHeight)
+      })
+    })
   }
 
-  const fetchMessages = function (phone, success) {
+  const fetchMessages = function (phone, success, since = 0) {
     const payload = {
-      phone: phone
+      phone: phone,
+      since: since
     }
+
+    let loadMore = false
 
     if (cachedMessages[phone] !== undefined) {
       const messages = cachedMessages[phone]
 
-      if (messages.length > 0) {
+      if (since === 0 && messages.length > 0) {
         payload.since = messages[messages.length - 1].timestamp
       }
+    } else {
+      const now = Date.now() / 1000
+
+      const windowStart = now - (2 * 7 * 24 * 60 * 60) // Two weeks
+
+      payload.since = windowStart
+
+      loadMore = true
     }
 
     $.post('messages.json', payload, function (data) {
@@ -113,19 +169,19 @@ $(document).ready(function () {
         cachedMessages[phone] = []
       }
 
-      cachedMessages[phone] = cachedMessages[phone].concat(data)
+      const toLoad = []
 
-      let cacheSize = cachedMessages[phone].length
+      data.forEach(function (message) {
+        const index = cachedMessages[phone].findIndex(stored => (stored.message === message.message) && (stored.timestamp === message.timestamp))
 
-      if (cacheSize > 1) {
-        while (cachedMessages[phone][cacheSize - 1] === cachedMessages[phone][cacheSize - 2]) {
-          cachedMessages[phone].pop()
+        if (index === -1) {
+          cachedMessages[phone].push(message)
 
-          cacheSize = cachedMessages[phone].length
+          toLoad.push(message)
         }
-      }
+      })
 
-      data.sort(function (a, b) {
+      toLoad.sort(function (a, b) {
         return a.timestamp - b.timestamp
       })
 
@@ -133,7 +189,7 @@ $(document).ready(function () {
         return a.timestamp - b.timestamp
       })
 
-      loadMessages(data)
+      loadMessages(toLoad, loadMore)
 
       success()
     })
@@ -213,13 +269,14 @@ $(document).ready(function () {
     }
   }
 
-  $('#message').on('keyup change', function (event) {
-    toggleSend()
-
-    updateCount()
-
+  $('#message').on('keydown change', function (event) {
     if (event.key === 'Enter') {
+      event.preventDefault()
+
       $('#send_button').click()
+    } else {
+      toggleSend()
+      updateCount()
     }
   })
 
