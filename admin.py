@@ -46,12 +46,28 @@ def mark_error_handled(modeladmin, request, queryset): # pylint: disable=unused-
 
 mark_error_handled.short_description = "Mark error handled"
 
+class OutgoingMessageMediaInline(admin.TabularInline):
+    model = OutgoingMessageMedia
+
+    fields = ['content_file', 'content_type', 'index']
+    readonly_fields = ['content_file', 'content_type', 'index']
+
+    def has_add_permission(self, request, obj=None): # pylint: disable=arguments-differ,unused-argument
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 @admin.register(OutgoingMessage)
 class OutgoingMessageAdmin(admin.ModelAdmin):
     if hasattr(settings, 'SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES') and settings.SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES:
         list_display = ('current_destination', 'reference_id', 'send_date', 'sent_date', 'current_message', 'errored')
     else:
         list_display = ('destination', 'reference_id', 'send_date', 'sent_date', 'message', 'errored')
+
+    inlines = [
+        OutgoingMessageMediaInline,
+    ]
 
     search_fields = ('destination', 'message', 'transmission_metadata',)
     list_filter = ('errored', 'send_date', 'sent_date',)
@@ -71,12 +87,28 @@ class OutgoingMessageAdmin(admin.ModelAdmin):
 
         return queryset, may_have_duplicates
 
+class IncomingMessageMediaInline(admin.TabularInline):
+    model = IncomingMessageMedia
+
+    fields = ['content_file', 'content_type', 'index']
+    readonly_fields = ['content_file', 'content_type', 'index']
+
+    def has_add_permission(self, request, obj=None): # pylint: disable=arguments-differ,unused-argument
+        return False
+
+    def has_delete_permission(self, request, obj=None):
+        return False
+
 @admin.register(IncomingMessage)
 class IncomingMessageAdmin(admin.ModelAdmin):
     if hasattr(settings, 'SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES') and settings.SIMPLE_MESSAGING_SHOW_ENCRYPTED_VALUES:
         list_display = ('current_sender', 'recipient', 'receive_date', 'current_message')
     else:
         list_display = ('sender', 'recipient', 'receive_date', 'message')
+
+    inlines = [
+        IncomingMessageMediaInline,
+    ]
 
     search_fields = ('sender', 'message',)
     list_filter = ('receive_date',)
