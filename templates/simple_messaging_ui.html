@@ -35,7 +35,7 @@
             </div>
             <div class="row">
             	{% for channel in channels %}
-					<div class="col-md-6 mb-3">
+					<div class="{% if channel.0 == 'simple_messaging_ui_default' %}col-md-12{% else %}col-md-6{% endif %} mb-3">
 						<h6>{{ channel.1 }}</h6>
 						<div class="border rounded-2 p-3 bg-white simple_message_ui_box border-1" id="message_box_{{ channel.0 }}" style="overflow-y: scroll;">
 						</div>

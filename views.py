@@ -135,6 +135,7 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
 
                     messages.append({
                         'direction': 'from-user',
+                        'channel': 'simple_messaging_ui_default',
                         'sender': destination,
                         'message': message.current_message(),
                         'timestamp': arrow.get(message.receive_date).float_timestamp,
@@ -146,6 +147,7 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
                 if message.current_destination() == destination:
                     messages.append({
                         'direction': 'from-system',
+                        'channel': 'simple_messaging_ui_default',
                         'recipient': destination,
                         'message': message.current_message(),
                         'timestamp': arrow.get(message.sent_date).float_timestamp,
