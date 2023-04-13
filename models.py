@@ -141,6 +141,8 @@ class OutgoingMessage(models.Model):
     transmission_metadata = models.TextField(blank=True, null=True)
     message_metadata = models.TextField(blank=True, null=True)
 
+    lookup_key = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
+
     def __str__(self):
         send_date = self.send_date.astimezone(pytz.timezone(settings.TIME_ZONE))
         message = self.message
@@ -357,6 +359,8 @@ class IncomingMessage(models.Model):
     message = models.TextField(max_length=1024)
 
     transmission_metadata = models.TextField(blank=True, null=True)
+
+    lookup_key = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
 
     def __str__(self):
         receive_date = self.receive_date.astimezone(pytz.timezone(settings.TIME_ZONE))

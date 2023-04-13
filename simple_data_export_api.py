@@ -20,13 +20,31 @@ def export_data_sources(params=None):
 
     data_sources = []
 
-    for incoming in IncomingMessage.objects.all():
+    incomings = IncomingMessage.objects.distinct('lookup_key')
+
+    for incoming in incomings:
+        if incoming.lookup_key is not None:
+            sender = incoming.current_sender()
+
+            if (sender in data_sources) is False:
+                data_sources.append(sender)
+
+    for incoming in IncomingMessage.objects.filter(lookup_key=None):
         sender = incoming.current_sender()
 
         if (sender in data_sources) is False:
             data_sources.append(sender)
 
-    for outgoing in OutgoingMessage.objects.all():
+    outgoings = OutgoingMessage.objects.distinct('lookup_key')
+
+    for outgoing in outgoings:
+        if outgoing.lookup_key is not None:
+            destination = outgoing.current_destination()
+
+            if (destination in data_sources) is False:
+                data_sources.append(destination)
+
+    for outgoing in OutgoingMessage.objects.filter(lookup_key=None):
         destination = outgoing.current_destination()
 
         if (destination in data_sources) is False:
