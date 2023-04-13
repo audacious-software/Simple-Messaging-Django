@@ -18,6 +18,7 @@ from six import python_2_unicode_compatible
 from django.conf import settings
 from django.core.checks import Error, Warning, register # pylint: disable=redefined-builtin
 from django.db import models
+from django.template import Template, Context
 from django.utils import timezone
 from django.utils.encoding import smart_str
 
@@ -205,6 +206,12 @@ class OutgoingMessage(models.Model):
 
         xmit_metadata.update(shorten_metadata)
 
+        template = Template(current_message)
+
+        context = Context(metadata)
+
+        current_message = template.render(context)
+
         self.transmission_metadata = json.dumps(xmit_metadata, indent=2)
         self.message = current_message
         self.save()
@@ -262,7 +269,7 @@ class OutgoingMessage(models.Model):
 
     def transmit(self): # pylint: disable=too-many-branches
         if self.sent_date is not None:
-            raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.')
+            raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.') # pylint: disable=broad-exception-raised
 
         self.sent_date = timezone.now() # Saving early to avoid accidental duplicate sends.
         self.save()

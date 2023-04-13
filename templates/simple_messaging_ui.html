@@ -14,9 +14,9 @@
         <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js" integrity="sha512-qTXRIMyZIFb8iQcfjXWCO8+M5Tbc38Qi5WzdPOYZHIlZpzBHG3L3by84BBBOiRGiEb7KKtAOAs5qYdUiZiQNNQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 	    <script src="{% static 'simple_messaging/js/simple_messaging_ui.js' %}"></script>
         <style>
-            .container {
+            /* .container {
                 max-width: 960px;
-            }
+            } */
         </style>
     </head>
     <body class="bg-light">
@@ -34,11 +34,13 @@
                 </div>
             </div>
             <div class="row">
-                <div class="col-md-12 mb-3">
-                    <div class="border rounded-2 p-3 bg-white" id="message_box" style="overflow-y: scroll;">
-
-                    </div>
-                </div>
+            	{% for channel in channels %}
+					<div class="{% if channel.0 == 'simple_messaging_ui_default' %}col-md-12{% else %}col-md-6{% endif %} mb-3">
+						<h6>{{ channel.1 }}</h6>
+						<div class="border rounded-2 p-3 bg-white simple_message_ui_box border-1" id="message_box_{{ channel.0 }}" style="overflow-y: scroll;">
+						</div>
+					</div>
+				{% endfor %}
                 <div class="col-md-12 mb-3 d-flex">
 					<div class="input-group flex-grow-1">
 						<textarea id="message" placeholder="Message" aria-label="Message" class="form-control" rows="2"></textarea>
@@ -79,5 +81,11 @@
 				window.lastPhone = "";
 			{% endif %}
 		{% endif %}
+		
+		window.simpleMessagingChannels = []
+		
+       	{% for channel in channels %}
+			window.simpleMessagingChannels.push(['{{ channel.0 }}', '{{ channel.1 }}',])
+		{% endfor %} 
 	</script>
 </html>
