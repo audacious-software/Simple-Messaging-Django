@@ -262,10 +262,10 @@ def simple_messaging_lookup_json(request): # pylint: disable=too-many-locals
 
     phone_numbers = request.POST.get('numbers', request.GET.get('numbers', '')).splitlines()
 
-    phone_numbers = list(filter(lambda x: x.strip() != '', phone_numbers))
+    phone_numbers = list(filter(lambda x: x.strip() != '', phone_numbers)) # pylint: disable=deprecated-lambda
 
     for app in settings.INSTALLED_APPS:
-        if len(phone_numbers) > 0:
+        if len(phone_numbers) > 0: # pylint: disable=len-as-condition
             try:
                 message_module = importlib.import_module('.simple_messaging_api', package=app)
 
