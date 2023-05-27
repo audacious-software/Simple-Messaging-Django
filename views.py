@@ -251,3 +251,28 @@ def simple_messaging_send_json(request): # pylint: disable=too-many-locals
             result['error'] = 'Unable to send message, please investigate.'
 
     return HttpResponse(json.dumps(result, indent=2), content_type='application/json', status=200)
+
+@staff_member_required
+def simple_messaging_lookup(request): # pylint: disable=too-many-locals
+    return render(request, 'simple_messaging_lookup.html')
+
+@staff_member_required
+def simple_messaging_lookup_json(request): # pylint: disable=too-many-locals
+    results = []
+
+    phone_numbers = request.POST.get('numbers', request.GET.get('numbers', '')).splitlines()
+
+    phone_numbers = list(filter(lambda x: x.strip() != '', phone_numbers))
+
+    for app in settings.INSTALLED_APPS:
+        if len(phone_numbers) > 0:
+            try:
+                message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                results.extend(message_module.lookup_numbers(phone_numbers))
+            except ImportError:
+                pass
+            except AttributeError:
+                pass
+
+    return HttpResponse(json.dumps(results, indent=2), content_type='application/json', status=200)
