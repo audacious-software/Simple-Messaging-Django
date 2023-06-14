@@ -153,7 +153,7 @@ class OutgoingMessage(models.Model):
 
         return '%s (PK: %d, %s)' % (message, self.pk, send_date.strftime('%c'))
 
-    def fetch_message(self, metadata=None): # pylint: disable=dangerous-default-value, too-many-branches
+    def fetch_message(self, metadata=None, skip_url_metadata=False): # pylint: disable=dangerous-default-value, too-many-branches
         tokens = self.current_message().split(' ')
 
         current_message = self.current_message()
@@ -161,50 +161,53 @@ class OutgoingMessage(models.Model):
         if metadata is None:
             metadata = {}
 
-        tokens = current_message.replace('\n', ' ').replace('\r', ' ').split(' ')
+        if skip_url_metadata is False: # pylint: disable=too-many-nested-blocks
+            xmit_metadata = {}
 
-        tokens.sort(key=lambda token: len(token), reverse=True) # pylint: disable=unnecessary-lambda
+            if self.transmission_metadata is not None and self.transmission_metadata != '':
+                xmit_metadata = json.loads(self.transmission_metadata)
 
-        shorten_metadata = {}
+            shorten_metadata = {}
 
-        for token in tokens: # pylint: disable=too-many-nested-blocks
-            if token.lower().startswith('http://') or token.lower().startswith('https://'):
-                short_url = None
-                long_url = token
+            tokens = current_message.replace('\n', ' ').replace('\r', ' ').split(' ')
 
-                for app in settings.INSTALLED_APPS:
-                    try:
-                        shorten_module = importlib.import_module('.simple_messaging_api', package=app)
+            tokens.sort(key=lambda token: len(token), reverse=True) # pylint: disable=unnecessary-lambda
 
-                        shorten_metadata.update(shorten_module.fetch_short_url_metadata(self))
-                    except ImportError:
-                        pass
-                    except AttributeError:
-                        pass
+            for token in tokens: # pylint: disable=too-many-nested-blocks
+                if token.lower().startswith('http://') or token.lower().startswith('https://'):
+                    short_url = None
+                    long_url = token
 
-                for app in settings.INSTALLED_APPS:
-                    if short_url is None:
+                    for app in settings.INSTALLED_APPS:
                         try:
                             shorten_module = importlib.import_module('.simple_messaging_api', package=app)
 
-                            shorten_metadata.update(metadata)
-
-                            short_url = shorten_module.shorten_url(long_url, metadata=shorten_metadata)
+                            shorten_metadata.update(shorten_module.fetch_short_url_metadata(self))
                         except ImportError:
                             pass
                         except AttributeError:
                             pass
 
-                if short_url is not None:
-                    while long_url in current_message:
-                        current_message = current_message.replace(long_url, short_url)
+                    for app in settings.INSTALLED_APPS:
+                        if short_url is None:
+                            try:
+                                shorten_module = importlib.import_module('.simple_messaging_api', package=app)
 
-        xmit_metadata = {}
+                                shorten_metadata.update(metadata)
 
-        if self.transmission_metadata is not None and self.transmission_metadata != '':
-            xmit_metadata = json.loads(self.transmission_metadata)
+                                short_url = shorten_module.shorten_url(long_url, metadata=shorten_metadata)
+                            except ImportError:
+                                pass
+                            except AttributeError:
+                                pass
 
-        xmit_metadata.update(shorten_metadata)
+                    if short_url is not None:
+                        while long_url in current_message:
+                            current_message = current_message.replace(long_url, short_url)
+
+            xmit_metadata.update(shorten_metadata)
+
+            self.transmission_metadata = json.dumps(xmit_metadata, indent=2)
 
         template = Template(current_message)
 
@@ -212,7 +215,6 @@ class OutgoingMessage(models.Model):
 
         current_message = template.render(context)
 
-        self.transmission_metadata = json.dumps(xmit_metadata, indent=2)
         self.message = current_message
         self.save()
 
