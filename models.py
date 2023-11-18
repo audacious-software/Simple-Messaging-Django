@@ -222,7 +222,7 @@ class OutgoingMessage(models.Model):
 
     def current_destination(self):
         if self.destination is not None and self.destination.startswith('secret:'):
-            return decrypt_value(self.destination)
+            return decrypt_value(self.destination).strip()
 
         return self.destination
 
