@@ -78,7 +78,7 @@ Simple Messaging is designed to work in conjunction with additional add-on packa
 
 ### Message Transmission
 
-[Simple Messaging: Azure](https://github.com/audacious-software/Simple-Messaging-Django-Azure)https://github.com/audacious-software/Simple-Messaging-Django-Azure - Implements the infrastructure to send and receive via [Azure Communication Services](https://azure.microsoft.com/en-us/products/communication-services). Includes SMS messaging.
+[Simple Messaging: Azure](https://github.com/audacious-software/Simple-Messaging-Django-Azure) - Implements the infrastructure to send and receive via [Azure Communication Services](https://azure.microsoft.com/en-us/products/communication-services). Includes SMS messaging.
 
 [Simple Messaging: Twilio](https://github.com/audacious-software/Simple-Messaging-Django-Twilio) - Implements the infrstructure to send and receive via Twilio services. Includes SMS, MMS, and WhatsApp messaging.
 
