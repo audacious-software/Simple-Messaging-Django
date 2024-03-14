@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long, wrong-import-position
+# pylint: disable=no-name-in-module, wrong-import-position
 
 import sys
 

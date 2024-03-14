@@ -9,6 +9,7 @@ import json
 import os
 import traceback
 
+import humanize
 import pytz
 import requests
 
@@ -222,7 +223,7 @@ class OutgoingMessage(models.Model):
 
     def current_destination(self):
         if self.destination is not None and self.destination.startswith('secret:'):
-            return decrypt_value(self.destination)
+            return decrypt_value(self.destination).strip()
 
         return self.destination
 
@@ -445,3 +446,11 @@ class IncomingMessageMedia(models.Model):
     content_file = models.FileField(upload_to='incoming_message_media', null=True, blank=True)
     content_url = models.CharField(max_length=1024, null=True, blank=True)
     content_type = models.CharField(max_length=128, default='application/octet-stream')
+
+    def __str__(self):
+        try:
+            return 'Message attachment (%s, %s)' % (self.content_type, humanize.naturalsize(self.content_file.file.size))
+        except ValueError:
+            pass
+
+        return 'Empty or malformed message attachment (check file permissions)'
