@@ -24,7 +24,11 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-9 pb-3 mt-3">
-                    <h4>Message Console</h4>
+                	{% if custom_title %}
+	                    <h4>{{ custom_title }}</h4>
+	                {% else %}
+	                    <h4>Message Console</h4>
+	                {% endif %}
                 </div>
                 <div class="col-md-3 pb-3 mt-3">
                     <div class="input-group">
@@ -41,7 +45,10 @@
 						</div>
 					</div>
 				{% endfor %}
-                <div class="col-md-12 mb-3 d-flex">
+                <div class="col-md-12 mb-3 d-flex" id="control-bar">
+                	{% if custom_ui %}
+               			{{ custom_ui }}
+                	{% endif %}
 					<div class="input-group flex-grow-1">
 						<textarea id="message" placeholder="Message" aria-label="Message" class="form-control" rows="2"></textarea>
 					</div>

@@ -34,7 +34,7 @@ def incoming_message_request(request):
     raise Http404("No module found to process incoming message.")
 
 @staff_member_required
-def simple_messaging_ui(request): # pylint:disable=too-many-branches
+def simple_messaging_ui(request): # pylint:disable=too-many-branches, too-many-statements
     context = {
         'identifier': request.GET.get('identifier', ''),
         'media_enabled': False,
@@ -75,6 +75,36 @@ def simple_messaging_ui(request): # pylint:disable=too-many-branches
         except AttributeError:
             pass
 
+    custom_ui = None
+
+    for app in settings.INSTALLED_APPS:
+        try:
+            response_module = importlib.import_module('.simple_messaging_api', package=app)
+
+            app_custom_ui = response_module.simple_messaging_custom_console_ui(context)
+
+            if app_custom_ui is not None:
+                if custom_ui is None:
+                    custom_ui = app_custom_ui
+                else:
+                    custom_ui += app_custom_ui
+        except ImportError:
+            pass
+        except AttributeError:
+            pass
+
+    custom_title = None
+
+    for app in settings.INSTALLED_APPS:
+        try:
+            response_module = importlib.import_module('.simple_messaging_api', package=app)
+
+            custom_title = response_module.simple_messaging_custom_title(context)
+        except ImportError:
+            pass
+        except AttributeError:
+            pass
+
     if len(precomposed) > 0: # pylint: disable=len-as-condition
         context['precomposed'] = precomposed
 
@@ -82,6 +112,8 @@ def simple_messaging_ui(request): # pylint:disable=too-many-branches
         channels.append(['simple_messaging_ui_default', 'Default Channel'])
 
     context['channels'] = channels
+    context['custom_ui'] = custom_ui
+    context['custom_title'] = custom_title
 
     if len(channels) == 1:
         context['channel_class'] = 'col-md-12'

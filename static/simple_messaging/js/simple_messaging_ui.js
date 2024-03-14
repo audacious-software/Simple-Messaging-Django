@@ -211,7 +211,9 @@ $(document).ready(function () {
     }
   }
 
-  $('.simple_message_ui_box').height($(window).height() - 240)
+  const controlHeight = $('#control-bar').height() + 168
+
+  $('.simple_message_ui_box').height($(window).height() - controlHeight)
 
   $('.simple_message_ui_box').click(function (event) {
     $('.simple_message_ui_box').removeClass('border-primary')
