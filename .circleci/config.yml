@@ -14,7 +14,7 @@ workflows:
 jobs:
   build-38:
     docker:
-      - image: cimg/python:3.8
+      - image: cimg/python:12.18-postgis
       - image: cimg/postgres:9.6.24-postgis
         auth:
           username: mydockerhub-user
@@ -45,7 +45,7 @@ jobs:
             mv project simple_messaging
             mkdir django
             cd django
-            django-admin.py startproject sm
+            django-admin startproject sm
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
