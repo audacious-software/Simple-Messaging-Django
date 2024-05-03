@@ -1,6 +1,5 @@
 # pylint: disable=line-too-long, no-member
 
-import csv
 import io
 import os
 import tempfile
