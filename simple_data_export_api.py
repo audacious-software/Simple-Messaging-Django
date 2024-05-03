@@ -10,7 +10,7 @@ import pytz
 
 from django.conf import settings
 
-from simple_data_export.utils import fetch_export_identifier # pylint: disable=import-error
+from simple_data_export.utils import fetch_export_identifier, UnicodeWriter # pylint: disable=import-error
 
 from .models import IncomingMessage, OutgoingMessage
 
@@ -63,17 +63,19 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
     if data_type == 'simple_messaging.conversation_transcripts':
         filename = tempfile.gettempdir() + os.path.sep + 'simple_messaging.conversation_transcripts' + '.txt'
 
-        with io.open(filename, 'w', encoding='utf-8') as outfile:
-            writer = csv.writer(outfile, delimiter='\t')
+        with io.open(filename, 'wb') as outfile:
+            writer = UnicodeWriter(outfile, delimiter='\t')
 
-            writer.writerow([
+            headers = [
                 'Sender',
                 'Recipient',
                 'Timestamp',
                 'Direction',
                 'Message',
                 'Error',
-            ])
+            ]
+
+            writer.writerow(headers)
 
             source_messages = {}
 
