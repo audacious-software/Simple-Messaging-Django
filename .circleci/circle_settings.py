@@ -28,6 +28,7 @@ INSTALLED_APPS = (
     'django.contrib.staticfiles',
     'django.contrib.gis',
     'quicksilver',
+    'simple_dashboard',
     'simple_messaging',
     'simple_data_export',
 )
