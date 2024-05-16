@@ -41,7 +41,7 @@ jobs:
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
             pip install --upgrade pip
-            pip install -r requirements.txt --progress-bar off
+            pip install -r requirements.txt
             cd ..
             mv project simple_messaging
             mkdir django
@@ -52,8 +52,8 @@ jobs:
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            cp simple_messaging/circle_settings.py sm/settings.py
-            cp simple_messaging/circle_urls.py sm/urls.py
+            cp simple_messaging/.circleci/circle_settings.py sm/settings.py
+            cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
@@ -102,7 +102,7 @@ jobs:
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
             pip install --upgrade pip
-            pip install -r requirements.txt --progress-bar off
+            pip install -r requirements.txt
             cd ..
             mv project simple_messaging
             mkdir django
@@ -113,8 +113,8 @@ jobs:
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            cp simple_messaging/circle_settings.py sm/settings.py
-            cp simple_messaging/circle_urls.py sm/urls.py
+            cp simple_messaging/.circleci/circle_settings.py sm/settings.py
+            cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
@@ -163,7 +163,7 @@ jobs:
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
             pip install --upgrade pip
-            pip install -r requirements.txt --progress-bar off
+            pip install -r requirements.txt
             cd ..
             mv project simple_messaging
             mkdir django
@@ -174,8 +174,8 @@ jobs:
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            cp simple_messaging/circle_settings.py sm/settings.py
-            cp simple_messaging/circle_urls.py sm/urls.py
+            cp simple_messaging/.circleci/circle_settings.py sm/settings.py
+            cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
@@ -226,7 +226,7 @@ jobs:
             virtualenv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
             pip install --upgrade pip
-            pip install -r requirements.txt --progress-bar off
+            pip install -r requirements.txt
             cd ..
             mv project simple_messaging
             mkdir django
@@ -237,8 +237,8 @@ jobs:
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            cp simple_messaging/circle_settings.py sm/settings.py
-            cp simple_messaging/circle_urls.py sm/urls.py
+            cp simple_messaging/.circleci/circle_settings.py sm/settings.py
+            cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
