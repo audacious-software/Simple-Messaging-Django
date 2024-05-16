@@ -3,7 +3,7 @@ version: 2.1
 orbs:
   python: circleci/python@2.1.1
   node: circleci/node@5.0.3
-  
+
 workflows:
   build:
     jobs:
@@ -51,16 +51,19 @@ jobs:
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
+            git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
             python manage.py migrate
+            python manage.py install_quicksilver_tasks
+            python manage.py simple_dashboard_update_values
             python manage.py test
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
-            bandit -r .      
+            bandit -r .
       - save_cache:
           key: venv-38-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
           paths:
@@ -109,16 +112,19 @@ jobs:
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
+            git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
             python manage.py migrate
+            python manage.py install_quicksilver_tasks
+            python manage.py simple_dashboard_update_values
             python manage.py test
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
-            bandit -r .      
+            bandit -r .
       - save_cache:
           key: venv-37-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
           paths:
@@ -167,16 +173,19 @@ jobs:
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
+            git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
             python manage.py migrate
+            python manage.py install_quicksilver_tasks
+            python manage.py simple_dashboard_update_values
             python manage.py test
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
-            bandit -r .      
+            bandit -r .
       - save_cache:
           key: venv-36-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
           paths:
@@ -227,16 +236,19 @@ jobs:
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
+            git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             cp simple_messaging/circle_settings.py sm/settings.py
             cp simple_messaging/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
             python manage.py migrate
+            python manage.py install_quicksilver_tasks
+            python manage.py simple_dashboard_update_values
             python manage.py test
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
-            bandit -r .      
+            bandit -r .
       - save_cache:
           key: venv-27-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
           paths:
