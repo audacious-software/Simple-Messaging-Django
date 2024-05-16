@@ -1,0 +1,76 @@
+{% with signal.latest_value as latest_value %}
+    {% with latest_value.fetch_value as log_items %}
+        <div class="mdc-typography mdc-typography--body1" style="margin-top: 16px;">
+            <div style="height: 240px;">
+                <canvas id="simple_dashboard_signal_{{ signal.pk }}"></canvas>
+            </div>
+
+            <script>
+                (function () {
+                    const chartElement = document.getElementById('simple_dashboard_signal_{{ signal.pk }}');
+
+                    const labels = []
+
+                    const incoming = []
+                    const outgoing = []
+                    const errors = []
+
+                    {% for log_item in log_items %}
+                        labels.push(moment('{{ log_item.date }}').format('MMM D'))
+                        incoming.push({{ log_item.incoming_count }})
+                        outgoing.push({{ log_item.outgoing_count }})
+                        errors.push({{ log_item.error_count }})
+                    {% endfor %}
+
+                    new Chart(chartElement, {
+                        type: 'bar',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Outgoing Messages',
+                                data: outgoing,
+                                borderColor: '#2962FF',
+                                backgroundColor: '#2962FF',
+                            }, {
+                                label: 'Incoming Messages',
+                                data: incoming,
+                                borderColor: '#00C853',
+                                backgroundColor: '#00C853',
+                            }, {
+                                label: 'Message Errors',
+                                data: errors,
+                                borderColor: '#D50000',
+                                backgroundColor: '#D50000',
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    stacked: true,
+                                },
+                                y: {
+                                    stacked: true,
+                                    ticks: {
+                                        precision: 0
+                                    }
+                                }
+                            },
+                            plugins: {
+                                legend: {
+                                    display: false
+                                }
+                            }
+                        }
+                    })
+                })();
+            </script>
+        </div>
+		<div class="mdc-typography mdc-typography--caption" style="margin-top: 8px;">
+			Last updated: <strong>{{ latest_value.recorded }}</strong>
+		</div>
+    {% endwith %}
+{% endwith %}
+
+
