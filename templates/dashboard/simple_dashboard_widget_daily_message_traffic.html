@@ -22,6 +22,12 @@
                         errors.push({{ log_item.error_count }})
                     {% endfor %}
 
+                    let yAxisType = 'linear'
+                    
+                   	{% if signal.configuration.log_y %}
+	                    yAxisType = 'logarithmic'
+	                {% endif %}
+
                     new Chart(chartElement, {
                         type: 'bar',
                         data: {
@@ -51,6 +57,7 @@
                                     stacked: true,
                                 },
                                 y: {
+									type: yAxisType,
                                     stacked: true,
                                     ticks: {
                                         precision: 0
