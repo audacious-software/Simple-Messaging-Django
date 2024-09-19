@@ -134,82 +134,80 @@ def simple_messaging_ui(request): # pylint:disable=too-many-branches, too-many-s
 def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
     messages = []
 
-    if request.method == 'POST':
-        phone = request.POST.get('phone', '')
-        since = float(request.POST.get('since', '0'))
+    phone = request.POST.get('phone', request.GET.get('phone', ''))
+    since = float(request.POST.get('since', request.GET.get('since', '0')))
 
-        start_time = arrow.get(since).datetime
+    start_time = arrow.get(since).datetime
 
-        real_phone = None
+    real_phone = None
+
+    for app in settings.INSTALLED_APPS:
+        if real_phone is None:
+            try:
+                message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                real_phone = message_module.fetch_phone_number(phone)
+            except ImportError:
+                pass
+            except AttributeError:
+                pass
+
+    if real_phone is not None:
+        phone = real_phone
+
+    try:
+        parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
+
+        destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+
+        for message in IncomingMessage.objects.filter(receive_date__gt=start_time):
+            if message.current_sender() == destination:
+                media_urls = message.media_urls()
+
+                messages.append({
+                    'direction': 'from-user',
+                    'channel': 'simple_messaging_ui_default',
+                    'sender': destination,
+                    'message': message.current_message(),
+                    'timestamp': arrow.get(message.receive_date).float_timestamp,
+                    'media_urls': media_urls,
+                    'message_id': message.pk,
+                })
+
+        for message in OutgoingMessage.objects.filter(sent_date__gt=start_time):
+            if message.current_destination() == destination:
+                messages.append({
+                    'direction': 'from-system',
+                    'channel': 'simple_messaging_ui_default',
+                    'recipient': destination,
+                    'message': message.current_message(),
+                    'timestamp': arrow.get(message.sent_date).float_timestamp,
+                    'media_urls': message.media_urls(),
+                    'message_id': message.pk,
+                })
 
         for app in settings.INSTALLED_APPS:
-            if real_phone is None:
-                try:
-                    message_module = importlib.import_module('.simple_messaging_api', package=app)
+            try:
+                message_module = importlib.import_module('.simple_messaging_api', package=app)
 
-                    real_phone = message_module.fetch_phone_number(phone)
-                except ImportError:
-                    pass
-                except AttributeError:
-                    pass
+                message_module.update_last_console_view(phone)
+            except ImportError:
+                pass
+            except AttributeError:
+                pass
 
-        if real_phone is not None:
-            phone = real_phone
+        for app in settings.INSTALLED_APPS:
+            try:
+                message_module = importlib.import_module('.simple_messaging_api', package=app)
 
-        try:
-            parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
+                message_module.annotate_console_messages(messages)
+            except ImportError:
+                pass
+            except AttributeError:
+                pass
 
-            destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
-
-            for message in IncomingMessage.objects.filter(receive_date__gt=start_time):
-                if message.current_sender() == destination:
-                    media_urls = message.media_urls()
-
-                    messages.append({
-                        'direction': 'from-user',
-                        'channel': 'simple_messaging_ui_default',
-                        'sender': destination,
-                        'message': message.current_message(),
-                        'timestamp': arrow.get(message.receive_date).float_timestamp,
-                        'media_urls': media_urls,
-                        'message_id': message.pk,
-                    })
-
-            for message in OutgoingMessage.objects.filter(sent_date__gt=start_time):
-                if message.current_destination() == destination:
-                    messages.append({
-                        'direction': 'from-system',
-                        'channel': 'simple_messaging_ui_default',
-                        'recipient': destination,
-                        'message': message.current_message(),
-                        'timestamp': arrow.get(message.sent_date).float_timestamp,
-                        'media_urls': message.media_urls(),
-                        'message_id': message.pk,
-                    })
-
-            for app in settings.INSTALLED_APPS:
-                try:
-                    message_module = importlib.import_module('.simple_messaging_api', package=app)
-
-                    message_module.update_last_console_view(phone)
-                except ImportError:
-                    pass
-                except AttributeError:
-                    pass
-
-            for app in settings.INSTALLED_APPS:
-                try:
-                    message_module = importlib.import_module('.simple_messaging_api', package=app)
-
-                    message_module.annotate_console_messages(messages)
-                except ImportError:
-                    pass
-                except AttributeError:
-                    pass
-
-
-        except phonenumbers.NumberParseException:
-            pass
+    except phonenumbers.NumberParseException:
+        pass
 
     return HttpResponse(json.dumps(messages, indent=2), content_type='application/json', status=200)
 

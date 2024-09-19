@@ -1,8 +1,11 @@
 # pylint: disable=line-too-long, no-member
 
 import io
+import importlib
+import json
 import os
 import tempfile
+import traceback
 
 import phonenumbers
 import pytz
@@ -56,97 +59,149 @@ def export_data_types():
         ('simple_messaging.conversation_transcripts', 'Conversation Transcripts',),
     ]
 
-def compile_data_export(data_type, data_sources, start_time=None, end_time=None, custom_parameters=None): # pylint: disable=too-many-locals, unused-argument, too-many-branches
+def compile_data_export(data_type, data_sources, start_time=None, end_time=None, custom_parameters=None): # pylint: disable=too-many-locals, unused-argument, too-many-branches, too-many-statements
     here_tz = pytz.timezone(settings.TIME_ZONE)
 
     if data_type == 'simple_messaging.conversation_transcripts':
-        filename = tempfile.gettempdir() + os.path.sep + 'simple_messaging.conversation_transcripts' + '.txt'
+        try:
+            filename = tempfile.gettempdir() + os.path.sep + 'simple_messaging.conversation_transcripts' + '.txt'
 
-        with io.open(filename, 'wb') as outfile:
-            writer = UnicodeWriter(outfile, delimiter='\t')
+            with io.open(filename, 'wb') as outfile:
+                writer = UnicodeWriter(outfile, delimiter='\t')
 
-            headers = [
-                'Sender',
-                'Recipient',
-                'Timestamp',
-                'Direction',
-                'Message',
-                'Error',
-            ]
+                headers = [
+                    'Sender',
+                    'Recipient',
+                    'Timestamp',
+                    'Direction',
+                    'Message',
+                    'Error',
+                ]
 
-            writer.writerow(headers)
+                extra_fields = []
 
-            source_messages = {}
+                for app in settings.INSTALLED_APPS:
+                    try:
+                        response_module = importlib.import_module('.simple_data_export_api', package=app)
 
-            outgoing_query = OutgoingMessage.objects.exclude(sent_date=None)
+                        extra_fields.extend(response_module.simple_messaging_export_fields(data_type))
+                    except ImportError:
+                        pass
+                    except AttributeError:
+                        pass
 
-            if start_time is not None:
-                outgoing_query = outgoing_query.filter(sent_date__gte=start_time)
+                headers.extend(extra_fields)
 
-            if end_time is not None:
-                outgoing_query = outgoing_query.filter(sent_date__lte=end_time)
+                writer.writerow(headers)
 
-            for outgoing in outgoing_query:
-                destination = outgoing.current_destination()
+                source_messages = {}
 
-                if destination in data_sources:
-                    if (destination in source_messages) is False:
-                        source_messages[destination] = []
+                outgoing_query = OutgoingMessage.objects.exclude(sent_date=None)
 
-                    message = {
-                        'sender': 'System',
-                        'recipient': fetch_export_identifier(destination),
-                        'timestamp': outgoing.sent_date.astimezone(here_tz).isoformat(),
-                        'direction': 'to-recipient',
-                        'message': outgoing.message,
-                        'error': outgoing.errored,
-                    }
+                if start_time is not None:
+                    outgoing_query = outgoing_query.filter(sent_date__gte=start_time)
 
-                    source_messages[destination].append(message)
+                if end_time is not None:
+                    outgoing_query = outgoing_query.filter(sent_date__lte=end_time)
 
-            incoming_query = IncomingMessage.objects.exclude(receive_date=None)
+                for outgoing in outgoing_query:
+                    destination = outgoing.current_destination()
 
-            if start_time is not None:
-                incoming_query = incoming_query.filter(receive_date__gte=start_time)
+                    if destination in data_sources:
+                        if (destination in source_messages) is False:
+                            source_messages[destination] = []
 
-            if end_time is not None:
-                incoming_query = incoming_query.filter(receive_date__lte=end_time)
+                        transmission_metadata = json.loads(outgoing.transmission_metadata)
 
-            for incoming in incoming_query:
-                sender = incoming.current_sender()
+                        message = {
+                            'sender': 'System',
+                            'recipient': fetch_export_identifier(destination),
+                            'raw_recipient': destination,
+                            'timestamp': outgoing.sent_date.astimezone(here_tz).isoformat(),
+                            'datetime': outgoing.sent_date.astimezone(here_tz),
+                            'direction': 'to-recipient',
+                            'message': outgoing.message.replace('\r', ' ').replace('\n', ' '),
+                            'channel': transmission_metadata.get('message_channel', None),
+                            'error': outgoing.errored,
+                            'id': outgoing.pk,
+                        }
 
-                if sender in data_sources:
-                    if (sender in source_messages) is False:
-                        source_messages[sender] = []
+                        for app in settings.INSTALLED_APPS:
+                            try:
+                                response_module = importlib.import_module('.simple_data_export_api', package=app)
 
-                    message = {
-                        'sender': fetch_export_identifier(sender),
-                        'recipient': 'System',
-                        'timestamp': incoming.receive_date.astimezone(here_tz).isoformat(),
-                        'direction': 'to-system',
-                        'message': incoming.message,
-                        'error': False,
-                    }
+                                message.update(response_module.simple_messaging_export_field_values(data_type, message, extra_fields))
+                            except ImportError:
+                                pass
+                            except AttributeError:
+                                pass
 
-                    source_messages[sender].append(message)
+                        source_messages[destination].append(message)
 
-            for source in data_sources:
-                if source in source_messages:
-                    source_messages[source].sort(key=lambda message: message['timestamp'])
+                incoming_query = IncomingMessage.objects.exclude(receive_date=None)
 
-                    for message in source_messages[source]:
-                        row = []
+                if start_time is not None:
+                    incoming_query = incoming_query.filter(receive_date__gte=start_time)
 
-                        row.append(message['sender'])
-                        row.append(message['recipient'])
-                        row.append(message['timestamp'])
-                        row.append(message['direction'])
-                        row.append(message['message'])
-                        row.append(str(message['error']))
+                if end_time is not None:
+                    incoming_query = incoming_query.filter(receive_date__lte=end_time)
 
-                        writer.writerow(row)
+                for incoming in incoming_query:
+                    sender = incoming.current_sender()
 
-        return filename
+                    if sender in data_sources:
+                        if (sender in source_messages) is False:
+                            source_messages[sender] = []
+
+                        transmission_metadata = json.loads(incoming.transmission_metadata)
+
+                        message = {
+                            'sender': fetch_export_identifier(sender),
+                            'raw_sender': sender,
+                            'recipient': 'System',
+                            'timestamp': incoming.receive_date.astimezone(here_tz).isoformat(),
+                            'datetime': incoming.receive_date.astimezone(here_tz),
+                            'direction': 'to-system',
+                            'message': incoming.message.replace('\r', ' ').replace('\n', ' '),
+                            'channel': transmission_metadata.get('message_channel', None),
+                            'error': False,
+                            'id': incoming.pk,
+                        }
+
+                        for app in settings.INSTALLED_APPS:
+                            try:
+                                response_module = importlib.import_module('.simple_data_export_api', package=app)
+
+                                message.update(response_module.simple_messaging_export_field_values(data_type, message, extra_fields))
+                            except ImportError:
+                                pass
+                            except AttributeError:
+                                pass
+
+                        source_messages[sender].append(message)
+
+                for source in data_sources:
+                    if source in source_messages:
+                        source_messages[source].sort(key=lambda message: message['timestamp'])
+
+                        for message in source_messages[source]:
+                            row = []
+
+                            row.append(message['sender'])
+                            row.append(message['recipient'])
+                            row.append(message['timestamp'])
+                            row.append(message['direction'])
+                            row.append(message['message'])
+                            row.append(str(message['error']))
+
+                            for extra_field in extra_fields:
+                                row.append(str(message.get(extra_field, '')))
+
+                            writer.writerow(row)
+
+            return filename
+        except:
+            traceback.print_exc()
 
     return None
 
