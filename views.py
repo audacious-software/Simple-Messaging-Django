@@ -1,6 +1,7 @@
 # pylint: disable=no-member, line-too-long
 
 import importlib
+import logging
 import json
 
 import arrow
@@ -15,6 +16,8 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 
 from .models import IncomingMessage, OutgoingMessage, OutgoingMessageMedia
+
+logger = logging.getLogger(__name__)
 
 @csrf_exempt
 def incoming_message_request(request):
@@ -37,7 +40,7 @@ def incoming_message_request(request):
 def simple_messaging_ui(request): # pylint:disable=too-many-branches, too-many-statements
     context = {
         'identifier': request.GET.get('identifier', ''),
-        'media_enabled': False,
+        'media_enabled': True,
     }
 
     precomposed = []

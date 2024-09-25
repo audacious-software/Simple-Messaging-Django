@@ -10,6 +10,7 @@ import os
 import traceback
 
 import humanize
+import phonenumbers
 import pytz
 import requests
 
@@ -405,10 +406,22 @@ class IncomingMessage(models.Model):
             self.update_message(self.message, force=True)
 
     def current_sender(self):
-        if self.sender is not None and self.sender.startswith('secret:'):
-            return decrypt_value(self.sender)
+        current_sender = None
 
-        return self.sender
+        if self.sender is not None and self.sender.startswith('secret:'):
+            current_sender = decrypt_value(self.sender)
+
+        if current_sender is None:
+            current_sender = self.sender
+
+        try:
+            parsed = phonenumbers.parse(current_sender, settings.PHONE_REGION)
+
+            current_sender = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+        except phonenumbers.NumberParseException:
+            pass
+
+        return current_sender
 
     def update_sender(self, new_sender, force=False):
         if force is False and new_sender == self.current_sender():
