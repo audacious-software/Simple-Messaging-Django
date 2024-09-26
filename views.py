@@ -17,7 +17,7 @@ from django.views.decorators.csrf import csrf_exempt
 
 from .models import IncomingMessage, OutgoingMessage, OutgoingMessageMedia
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger(__name__) # pylint: disable=invalid-name
 
 @csrf_exempt
 def incoming_message_request(request):
