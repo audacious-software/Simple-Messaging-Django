@@ -83,7 +83,7 @@ def handle_lock(handle):
         lock.release()
         logging.debug("released.")
 
-        logging.info("done in %.2f seconds", (time.time() - start_time))
+        logging.debug("done in %.2f seconds", (time.time() - start_time))
         return
 
     return wrapper

@@ -82,7 +82,7 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
                 try:
                     response_module = importlib.import_module('.simple_data_export_api', package=app)
 
-                    extra_fields.extend(response_module.simple_messaging_export_fields(data_type))
+                    extra_fields.extend(response_module.simple_data_export_fields(data_type))
                 except ImportError:
                     pass
                 except AttributeError:
@@ -128,7 +128,7 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
                         try:
                             response_module = importlib.import_module('.simple_data_export_api', package=app)
 
-                            message.update(response_module.simple_messaging_export_field_values(data_type, message, extra_fields))
+                            message.update(response_module.simple_data_export_field_values(data_type, message, extra_fields))
                         except ImportError:
                             pass
                         except AttributeError:
@@ -170,7 +170,7 @@ def compile_data_export(data_type, data_sources, start_time=None, end_time=None,
                         try:
                             response_module = importlib.import_module('.simple_data_export_api', package=app)
 
-                            message.update(response_module.simple_messaging_export_field_values(data_type, message, extra_fields))
+                            message.update(response_module.simple_data_export_field_values(data_type, message, extra_fields))
                         except ImportError:
                             pass
                         except AttributeError:
