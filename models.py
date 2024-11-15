@@ -94,39 +94,37 @@ def check_media_upload_available(app_configs, **kwargs): # pylint: disable=unuse
 
     return errors
 
+@register()
+def check_messaging_key(app_configs, **kwargs): # pylint: disable=unused-argument
+    errors = []
+
+    if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY') is False:
+        error = Error('SIMPLE_MESSAGING_SECRET_KEY parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_SECRET_KEY.', obj=None, id='simple_messaging.E002')
+        errors.append(error)
+
+    return errors
+
 def decrypt_value(stored_text):
-    try:
-        key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
+    key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
 
-        box = SecretBox(key)
+    box = SecretBox(key)
 
-        ciphertext = base64.b64decode(stored_text.replace('secret:', '', 1))
+    ciphertext = base64.b64decode(stored_text.replace('secret:', '', 1))
 
-        cleartext = box.decrypt(ciphertext)
+    cleartext = box.decrypt(ciphertext)
 
-        return smart_str(cleartext)
-
-    except AttributeError:
-        pass
-
-    return None
+    return smart_str(cleartext)
 
 def encrypt_value(cleartext):
-    try:
-        key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
+    key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
 
-        box = SecretBox(key)
+    box = SecretBox(key)
 
-        uft8_bytes = cleartext.encode('utf-8')
+    uft8_bytes = cleartext.encode('utf-8')
 
-        ciphertext = box.encrypt(uft8_bytes)
+    ciphertext = box.encrypt(uft8_bytes)
 
-        return 'secret:' + smart_str(base64.b64encode(ciphertext))
-
-    except AttributeError:
-        pass
-
-    return None
+    return 'secret:' + smart_str(base64.b64encode(ciphertext))
 
 @python_2_unicode_compatible
 class OutgoingMessage(models.Model):
