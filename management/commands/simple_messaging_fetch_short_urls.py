@@ -4,6 +4,7 @@ from __future__ import print_function
 
 import binascii
 import json
+import logging
 
 import requests
 
@@ -16,6 +17,8 @@ from django.utils import timezone
 from quicksilver.decorators import handle_lock, handle_schedule, add_qs_arguments
 
 from ...decorators import log_scheduled_event
+
+logger = logging.getLogger(__name__)
 
 class Command(BaseCommand):
     help = 'Diagnostic command for retrieving short URLs created by this client'
