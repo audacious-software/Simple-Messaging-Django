@@ -99,7 +99,7 @@ def check_messaging_key(app_configs, **kwargs): # pylint: disable=unused-argumen
     errors = []
 
     if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY') is False:
-        error = Error('SIMPLE_MESSAGING_SECRET_KEY parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_SECRET_KEY.', obj=None, id='simple_messaging.E002')
+        error = Warning('SIMPLE_MESSAGING_SECRET_KEY parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_SECRET_KEY.', obj=None, id='simple_messaging.E002')
         errors.append(error)
 
     return errors
