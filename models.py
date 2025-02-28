@@ -105,26 +105,32 @@ def check_messaging_key(app_configs, **kwargs): # pylint: disable=unused-argumen
     return errors
 
 def decrypt_value(stored_text):
-    key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
+    if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+        key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
 
-    box = SecretBox(key)
+        box = SecretBox(key)
 
-    ciphertext = base64.b64decode(stored_text.replace('secret:', '', 1))
+        ciphertext = base64.b64decode(stored_text.replace('secret:', '', 1))
 
-    cleartext = box.decrypt(ciphertext)
+        cleartext = box.decrypt(ciphertext)
 
-    return smart_str(cleartext)
+        return smart_str(cleartext)
+
+    return stored_text
 
 def encrypt_value(cleartext):
-    key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
+    if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+        key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
 
-    box = SecretBox(key)
+        box = SecretBox(key)
 
-    uft8_bytes = cleartext.encode('utf-8')
+        uft8_bytes = cleartext.encode('utf-8')
 
-    ciphertext = box.encrypt(uft8_bytes)
+        ciphertext = box.encrypt(uft8_bytes)
 
-    return 'secret:' + smart_str(base64.b64encode(ciphertext))
+        return 'secret:' + smart_str(base64.b64encode(ciphertext))
+
+    return cleartext
 
 @python_2_unicode_compatible
 class OutgoingMessage(models.Model):
