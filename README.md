@@ -10,7 +10,7 @@ This package provides the basic incoming and outgoing message Django models, as 
 
 ### Incoming Message
 
-Represents an message received from outside the system. 
+Represents an message received from outside the system.
 
 **Sender:** Phone number or address of the party originating the message. Note that this framework *does not* impose any validation or checking of correctness, as this model may be used in a *wide* variety of use cases: phone numbers, e-mail addresses, instant messenger handlee, etc. Note that this *may* be encrypted for security reasons if configured.
 
@@ -26,7 +26,7 @@ Represents an message received from outside the system.
 
 ### Incoming Message Media
 
-Small model wrapping a file or other multimedia content received with a message. 
+Small model wrapping a file or other multimedia content received with a message.
 
 **Message:** Incoming message that arrived with this media.
 
@@ -40,7 +40,7 @@ Small model wrapping a file or other multimedia content received with a message.
 
 ### Outgoing Message
 
-Represents an message sent from the system. 
+Represents an message sent from the system.
 
 **Destination:** Phone number or address of the to receive the message Note that this framework *does not* impose any validation or checking of correctness, as this model may be used in a *wide* variety of use cases: phone numbers, e-mail addresses, instant messenger handlee, etc. Note that this *may* be encrypted for security reasons if configured.
 
@@ -62,7 +62,7 @@ Represents an message sent from the system.
 
 ### Outgoing Message Media
 
-Small model wrapping files or other multimedia content to be transmitted alongside a message. 
+Small model wrapping files or other multimedia content to be transmitted alongside a message.
 
 **Message:** Outgoing message that includes this content.
 
@@ -116,3 +116,5 @@ Licensed under the Apache License, Version 2.0 (the "License"); you may not use 
 [http://www.apache.org/licenses/LICENSE-2.0](http://www.apache.org/licenses/LICENSE-2.0)
 
 Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.
+
+Includes sound effects from [Material Design Sound Resources](https://m2.material.io/design/sound/sound-resources.html).

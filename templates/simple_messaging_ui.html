@@ -77,6 +77,8 @@
                 </div>
             </div>
         </div>
+		<audio id="incoming_earcon" src="{% static 'simple_messaging/earcons/incoming.mp3' %}" hidden></audio>
+		<audio id="outgoing_earcon" src="{% static 'simple_messaging/earcons/outgoing.mp3' %}" hidden></audio>
     </body>
     <script>
 		{% if identifier %}
@@ -88,11 +90,11 @@
 				window.lastPhone = "";
 			{% endif %}
 		{% endif %}
-		
+
 		window.simpleMessagingChannels = []
-		
+
        	{% for channel in channels %}
 			window.simpleMessagingChannels.push(['{{ channel.0 }}', '{{ channel.1 }}',])
-		{% endfor %} 
+		{% endfor %}
 	</script>
 </html>
