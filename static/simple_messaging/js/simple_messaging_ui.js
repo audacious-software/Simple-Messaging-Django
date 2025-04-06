@@ -93,8 +93,6 @@ $(document).ready(function () {
         toScroll.push(message.channel)
       }
 
-      console.log(`#outgoing_earcon: ${$('#outgoing_earcon')[0].ended}`)
-
       if ($('#outgoing_earcon')[0].paused || $('#outgoing_earcon')[0].ended) {
         $('#incoming_earcon')[0].play()
       }
