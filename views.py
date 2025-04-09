@@ -217,7 +217,7 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
     return HttpResponse(json.dumps(messages, indent=2), content_type='application/json', status=200)
 
 @staff_member_required
-def simple_messaging_send_json(request): # pylint: disable=too-many-locals
+def simple_messaging_send_json(request): # pylint: disable=too-many-locals, too-many-branches, too-many-statements
     result = {
         'success': False
     }
