@@ -301,7 +301,7 @@ $(document).ready(function () {
     formData.append('channel', window.selectedMessagingChannel)
     formData.append('attachment', attachment)
 
-    window.messageExtensionFunctions.forEach(function(extensionFunction) {
+    window.messageExtensionFunctions.forEach(function (extensionFunction) {
       extensionFunction(formData)
     })
 
