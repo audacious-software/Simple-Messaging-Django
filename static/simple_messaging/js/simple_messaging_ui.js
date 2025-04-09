@@ -92,6 +92,10 @@ $(document).ready(function () {
       if (toScroll.includes(message.channel) === false) {
         toScroll.push(message.channel)
       }
+
+      if ($('#outgoing_earcon')[0].paused || $('#outgoing_earcon')[0].ended) {
+        $('#incoming_earcon')[0].play()
+      }
     })
 
     toScroll.forEach(function (channel) {
