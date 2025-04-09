@@ -158,59 +158,61 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
     if real_phone is not None:
         phone = real_phone
 
+    destination = phone
+
     try:
-        parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
+        if hasattr(settings, 'PHONE_REGION'):
+            parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
 
-        destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
-
-        for message in IncomingMessage.objects.filter(receive_date__gt=start_time):
-            if message.current_sender() == destination:
-                media_urls = message.media_urls()
-
-                messages.append({
-                    'direction': 'from-user',
-                    'channel': 'simple_messaging_ui_default',
-                    'sender': destination,
-                    'message': message.current_message(),
-                    'timestamp': arrow.get(message.receive_date).float_timestamp,
-                    'media_urls': media_urls,
-                    'message_id': message.pk,
-                })
-
-        for message in OutgoingMessage.objects.filter(sent_date__gt=start_time):
-            if message.current_destination() == destination:
-                messages.append({
-                    'direction': 'from-system',
-                    'channel': 'simple_messaging_ui_default',
-                    'recipient': destination,
-                    'message': message.current_message(),
-                    'timestamp': arrow.get(message.sent_date).float_timestamp,
-                    'media_urls': message.media_urls(),
-                    'message_id': message.pk,
-                })
-
-        for app in settings.INSTALLED_APPS:
-            try:
-                message_module = importlib.import_module('.simple_messaging_api', package=app)
-
-                message_module.update_last_console_view(phone)
-            except ImportError:
-                pass
-            except AttributeError:
-                pass
-
-        for app in settings.INSTALLED_APPS:
-            try:
-                message_module = importlib.import_module('.simple_messaging_api', package=app)
-
-                message_module.annotate_console_messages(messages)
-            except ImportError:
-                pass
-            except AttributeError:
-                pass
-
+            destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
     except phonenumbers.NumberParseException:
         pass
+
+    for message in IncomingMessage.objects.filter(receive_date__gt=start_time):
+        if message.current_sender() == destination:
+            media_urls = message.media_urls()
+
+            messages.append({
+                'direction': 'from-user',
+                'channel': 'simple_messaging_ui_default',
+                'sender': destination,
+                'message': message.current_message(),
+                'timestamp': arrow.get(message.receive_date).float_timestamp,
+                'media_urls': media_urls,
+                'message_id': message.pk,
+            })
+
+    for message in OutgoingMessage.objects.filter(sent_date__gt=start_time):
+        if message.current_destination() == destination:
+            messages.append({
+                'direction': 'from-system',
+                'channel': 'simple_messaging_ui_default',
+                'recipient': destination,
+                'message': message.current_message(),
+                'timestamp': arrow.get(message.sent_date).float_timestamp,
+                'media_urls': message.media_urls(),
+                'message_id': message.pk,
+            })
+
+    for app in settings.INSTALLED_APPS:
+        try:
+            message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+            message_module.update_last_console_view(phone)
+        except ImportError:
+            pass
+        except AttributeError:
+            pass
+
+    for app in settings.INSTALLED_APPS:
+        try:
+            message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+            message_module.annotate_console_messages(messages)
+        except ImportError:
+            pass
+        except AttributeError:
+            pass
 
     return HttpResponse(json.dumps(messages, indent=2), content_type='application/json', status=200)
 
@@ -240,8 +242,14 @@ def simple_messaging_send_json(request): # pylint: disable=too-many-locals
         if real_phone is not None:
             phone = real_phone
 
-        parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
-        destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+        destination = phone
+
+        try:
+            if hasattr(settings, 'PHONE_REGION'):
+                parsed = phonenumbers.parse(phone, settings.PHONE_REGION)
+                destination = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
+        except phonenumbers.NumberParseException:
+            pass
 
         outgoing = OutgoingMessage.objects.create(destination=destination, send_date=timezone.now(), message=message)
 
@@ -273,6 +281,17 @@ def simple_messaging_send_json(request): # pylint: disable=too-many-locals
             index_counter += 1
 
             media.content_file.save(outgoing_file.name, outgoing_file)
+
+        for app in settings.INSTALLED_APPS:
+            if real_phone is None:
+                try:
+                    message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                    real_phone = message_module.annotate_messsage(outgoing, request.POST)
+                except ImportError:
+                    pass
+                except AttributeError:
+                    pass
 
         call_command('simple_messaging_send_pending_messages')
 
