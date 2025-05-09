@@ -31,9 +31,10 @@ SIMPLE_MESSAGING_OUTGOING_MEDIA_FILE_FOLDER = 'outgoing_message_media'
 def check_data_export_parameters(app_configs, **kwargs): # pylint: disable=unused-argument
     errors = []
 
-    if hasattr(settings, 'SIMPLE_MESSAGING_COUNTRY_CODE') is False:
-        error = Error('SIMPLE_MESSAGING_COUNTRY_CODE parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_COUNTRY_CODE.', obj=None, id='simple_messaging.E001')
-        errors.append(error)
+    if ('simple_messaging_switchboard' in settings.INSTALLED_APPS) is False:
+        if hasattr(settings, 'SIMPLE_MESSAGING_COUNTRY_CODE') is False:
+            error = Error('SIMPLE_MESSAGING_COUNTRY_CODE parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_COUNTRY_CODE.', obj=None, id='simple_messaging.E001')
+            errors.append(error)
 
     return errors
 
@@ -99,7 +100,7 @@ def check_messaging_key(app_configs, **kwargs): # pylint: disable=unused-argumen
     errors = []
 
     if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY') is False:
-        error = Warning('SIMPLE_MESSAGING_SECRET_KEY parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_SECRET_KEY.', obj=None, id='simple_messaging.E002')
+        error = Warning('SIMPLE_MESSAGING_SECRET_KEY parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_SECRET_KEY.', obj=None, id='simple_messaging.W002')
         errors.append(error)
 
     return errors
