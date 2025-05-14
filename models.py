@@ -276,7 +276,7 @@ class OutgoingMessage(models.Model):
         if self.message.startswith('secret:') is False:
             self.update_message(self.message, force=True)
 
-    def transmit(self): # pylint: disable=too-many-branches
+    def transmit(self): # pylint: disable=too-many-branches, too-many-statements
         if self.sent_date is not None:
             raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.') # pylint: disable=broad-exception-raised
 
@@ -293,7 +293,7 @@ class OutgoingMessage(models.Model):
             except AttributeError:
                 pass
 
-        try:
+        try: # pylint: disable=too-many-nested-blocks
             processed = False
             processed_metadata = {}
 
