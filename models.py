@@ -305,8 +305,12 @@ class OutgoingMessage(models.Model):
                         metadata = response_module.process_outgoing_message(self)
 
                         if metadata is not None:
-                            processed = True
                             processed_metadata.update(metadata)
+
+                            if self.errored is False:
+                                processed = True
+                            else:
+                                break
                     except ImportError:
                         pass
                     except AttributeError:
@@ -317,16 +321,17 @@ class OutgoingMessage(models.Model):
             if self.transmission_metadata is not None and self.transmission_metadata.strip() != '':
                 transmission_metadata = json.loads(self.transmission_metadata)
 
-            if processed:
-                transmission_metadata.update(processed_metadata)
+            self.sent_date = timezone.now()
 
-                self.sent_date = timezone.now()
+            transmission_metadata.update(processed_metadata)
 
-                self.errored = False
-            else:
+            if processed is False:
                 self.errored = True
 
-                transmission_metadata['error'] = 'No processor found for message.'
+                if len(processed_metadata) == 0:
+                    transmission_metadata['error'] = 'No processor found for message.'
+                else:
+                    transmission_metadata['error'] = 'Error in processing message.'
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
@@ -340,7 +345,9 @@ class OutgoingMessage(models.Model):
             if self.transmission_metadata is not None and self.transmission_metadata.strip() != '':
                 transmission_metadata = json.loads(self.transmission_metadata)
 
-            transmission_metadata['error'] = traceback.format_exc().splitlines()
+            transmission_metadata['error'] = 'Error in processing message.'
+
+            transmission_metadata['traceback'] = traceback.format_exc().splitlines()
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
