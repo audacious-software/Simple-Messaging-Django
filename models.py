@@ -328,7 +328,7 @@ class OutgoingMessage(models.Model):
             if processed is False:
                 self.errored = True
 
-                if len(processed_metadata) == 0:
+                if len(processed_metadata) == 0: # pylint: disable=len-as-condition
                     transmission_metadata['error'] = 'No processor found for message.'
                 else:
                     transmission_metadata['error'] = 'Error in processing message.'
