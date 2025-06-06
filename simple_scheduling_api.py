@@ -1,11 +1,14 @@
-# pylint: disable=line-too-long, no-member
+# pylint: disable=line-too-long, no-member, wrong-import-order
 
 import base64
 import json
 import mimetypes
 import posixpath
 
-from urllib.parse import urlsplit
+try:
+    from urllib.parse import urlsplit # pylint: disable=no-name-in-module
+except ImportError:
+    from urlparse import urlsplit
 
 import requests
 
@@ -49,7 +52,7 @@ def execute_scheduled_item(task, when, context=dict): # pylint: disable=too-many
 
             media_content = media_item.get('base64', None)
             media_type = media_item.get('type', 'application/octet-stream')
-            filename =  media_item.get('filename', None)
+            filename = media_item.get('filename', None)
 
             if media_url is not None:
                 response = requests.get(media_url, timeout=300)
