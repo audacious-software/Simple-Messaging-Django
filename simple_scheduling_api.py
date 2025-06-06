@@ -5,7 +5,7 @@ import json
 import mimetypes
 import posixpath
 
-from urllib.parse import urlparse, urlsplit
+from urllib.parse import urlsplit
 
 import requests
 
