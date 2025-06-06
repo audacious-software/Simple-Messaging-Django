@@ -1,19 +1,21 @@
+# pylint: disable=line-too-long, no-member
+
 import base64
 import json
 import mimetypes
 import posixpath
 
-from urllib.parse import urlparse
+from urllib.parse import urlparse, urlsplit
 
 import requests
 
 from django.core.files.base import ContentFile
 
+from simple_scheduling import SchedulingError # pylint: disable=import-error
+
 from .models import OutgoingMessage, OutgoingMessageMedia
 
-from simple_scheduling import SchedulingError
-
-def execute_scheduled_item(task, when, context=dict):
+def execute_scheduled_item(task, when, context=dict): # pylint: disable=too-many-locals
     if task == 'simple_messaging.send_message':
         destination = context.get('destination', None)
         message = context.get('message', None)
@@ -57,7 +59,7 @@ def execute_scheduled_item(task, when, context=dict):
                 outgoing_media.content_file.save()
 
                 if filename is None:
-                    url_path = urlparse.urlsplit(media_url).path
+                    url_path = urlsplit(media_url).path
 
                     filename = posixpath.basename(url_path)
 
