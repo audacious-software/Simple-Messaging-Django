@@ -20,6 +20,7 @@ from six import python_2_unicode_compatible
 from django.conf import settings
 from django.core.checks import Error, Warning, register # pylint: disable=redefined-builtin
 from django.db import models
+from django.db.models import Q
 from django.template import Template, Context
 from django.utils import timezone
 from django.utils.encoding import smart_str
@@ -479,3 +480,88 @@ class IncomingMessageMedia(models.Model):
             pass
 
         return 'Empty or malformed message attachment (check file permissions)'
+
+def fetch_messages(direction=None, query=None, destination=None, limit=50, offset=0, order='descending', pending=False):
+    messages = []
+
+    if direction in (None, 'incoming'):
+        sort = '-receive_date'
+
+        if order == 'ascending':
+            sort = 'receive_date'
+
+        message_query = Q(pk__gte=0)
+
+        if query is not None:
+           message_query = message_query | Q(message__icontains=query)
+
+        for incoming in IncomingMessage.objects.filter(message_query).order_by(sort):
+            messages.append({
+                'direction': 'incoming',
+                'sender': incoming.current_sender(),
+                'destination': incoming.recipient,
+                'when': incoming.receive_date,
+                'message': incoming.message
+            })
+
+    if direction in (None, 'outgoing'):
+        sort = '-sent_date'
+
+        if order == 'ascending':
+            sort = 'sent_date'
+
+        message_query = Q(pk__gte=0)
+
+        if query is not None:
+           message_query = message_query | Q(message__icontains=query)
+
+        for outgoing in OutgoingMessage.objects.filter(message_query).order_by(sort):
+            messages.append({
+                'direction': 'outgoing',
+                'sender': 'system',
+                'destination': outgoing.current_destination(),
+                'when': outgoing.sent_date,
+                'message': outgoing.message
+            })
+
+    reverse_sort = False
+
+    if order == 'ascending':
+        reverse_sort = True
+
+    messages.sort(key=lambda item: item['when'], reverse=reverse_sort)
+
+    if len(messages) < offset:
+        return []
+
+    return messages[offset:(offset + limit)]
+
+class DestinationProxy:
+    def __init__ (self, identifier, time_zone):
+        self.identifier = identifier
+        self.time_zone = time_zone
+
+    def fetch_destination(self):
+        return self.identifier
+
+    def fetch_tz(self):
+        return self.time_zone
+
+def fetch_destination_proxy(identifier):
+    proxy = None
+
+    for app in settings.INSTALLED_APPS:
+        if proxy is None:
+            try:
+                messaging_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                proxy = messaging_module.fetch_destination_proxy(identifier)
+            except ImportError:
+                pass
+            except AttributeError:
+                pass
+
+    if proxy is None:
+        proxy = DestinationProxy(identifier, settings.TIME_ZONE)
+
+    return proxy

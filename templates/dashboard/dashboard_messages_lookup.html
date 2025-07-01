@@ -1,0 +1,45 @@
+{% extends 'simple_dashboard_base.html' %}
+{% load static %}
+{% load simple_dashboard %}
+{% block 'page_title' %}Phone Number Lookup | {% simple_dashboard_site_name %}{% endblock %}
+{% block 'navigation_title' %}Phone Number Lookup{% endblock %}
+{% block 'main_content' %}
+	<div class="mdc-layout-grid">
+		<div class="mdc-layout-grid__inner">
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+				<div class="mdc-card" style="padding: 16px;">
+					{% csrf_token %}
+					<div class="mdc-typography--subtitle1" style="margin-bottom: 8px;"><strong>Enter phone numbers below, one per line:</strong></div>
+
+					<label class="mdc-text-field mdc-text-field--outlined mdc-text-field--textarea mdc-text-field--no-label" id="phonenumbers_field" style="width: 100%;">
+						<span class="mdc-notched-outline">
+							<span class="mdc-notched-outline__leading"></span>
+							<span class="mdc-notched-outline__trailing"></span>
+						</span>
+						<span class="mdc-text-field__resizer">
+							<textarea class="mdc-text-field__input" rows="4" aria-label="Phone Numbers" style="width: 100%;" maxlength="4096"></textarea>
+						</span>
+					</label>
+
+					<button class="mdc-button mdc-button--raised" id="button_lookup" style="height: 56px; margin-top: 16px; width: 100%;">
+						<span class="mdc-button__ripple"></span>
+						<span class="mdc-button__focus-ring"></span>
+						<span class="mdc-button__label">Lookup</span>
+					</button>
+				</div>
+			</div>
+			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-6">
+				<div class="mdc-card" style="padding: 16px;">
+					<h6 class="mdc-typography--headline6" style="margin-top: 0px; margin-bottom: 16px;">Lookup Results</h6>
+
+					<div id="lookup_results" class="w-100">
+						<em>No results yet&#8230;</em>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block 'js_init' %}
+	<script data-main="{% static 'simple_messaging/js/app/dashboard_message_lookup.js' %}" src="{% static 'simple_dashboard/js/vendor/require.js' %}"></script>
+{% endblock %}

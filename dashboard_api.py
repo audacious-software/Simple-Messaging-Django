@@ -5,6 +5,7 @@ import datetime
 import pytz
 
 from django.conf import settings
+from django.urls import reverse
 from django.utils import timezone
 
 from simple_dashboard.models import DashboardSignal
@@ -84,3 +85,14 @@ def update_dashboard_signal_value(signal_name):
         return messages
 
     return None
+
+def dashboard_pages():
+	return [{
+        'title': 'Messages Log',
+        'icon': 'forum',
+		'url': reverse('dashboard_messages_log_now'),
+    }, {
+        'title': 'Phone Lookup',
+        'icon': 'travel_explore',
+		'url': reverse('dashboard_lookup'),
+    }]
