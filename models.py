@@ -513,7 +513,7 @@ def fetch_messages(direction=None, query=None, destination=None, limit=50, offse
         message_query = Q(pk__gte=0)
 
         if query is not None:
-            message_query = message_query | Q(message__icontains=query)
+            message_query = message_query | Q(message__icontains=query) # pylint: disable=unsupported-binary-operation
 
         for outgoing in OutgoingMessage.objects.filter(message_query).order_by(sort):
             messages.append({
@@ -536,8 +536,8 @@ def fetch_messages(direction=None, query=None, destination=None, limit=50, offse
 
     return messages[offset:(offset + limit)]
 
-class DestinationProxy:
-    def __init__ (self, identifier, time_zone):
+class DestinationProxy: # pylint: disable=old-style-class
+    def __init__(self, identifier, time_zone):
         self.identifier = identifier
         self.time_zone = time_zone
 
