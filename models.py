@@ -481,7 +481,7 @@ class IncomingMessageMedia(models.Model):
 
         return 'Empty or malformed message attachment (check file permissions)'
 
-def fetch_messages(direction=None, query=None, destination=None, limit=50, offset=0, order='descending', pending=False):
+def fetch_messages(direction=None, query=None, destination=None, limit=50, offset=0, order='descending', pending=False): # pylint: disable=too-many-arguments, unused-argument
     messages = []
 
     if direction in (None, 'incoming'):
@@ -493,7 +493,7 @@ def fetch_messages(direction=None, query=None, destination=None, limit=50, offse
         message_query = Q(pk__gte=0)
 
         if query is not None:
-           message_query = message_query | Q(message__icontains=query)
+            message_query = message_query | Q(message__icontains=query)
 
         for incoming in IncomingMessage.objects.filter(message_query).order_by(sort):
             messages.append({
@@ -513,7 +513,7 @@ def fetch_messages(direction=None, query=None, destination=None, limit=50, offse
         message_query = Q(pk__gte=0)
 
         if query is not None:
-           message_query = message_query | Q(message__icontains=query)
+            message_query = message_query | Q(message__icontains=query)
 
         for outgoing in OutgoingMessage.objects.filter(message_query).order_by(sort):
             messages.append({

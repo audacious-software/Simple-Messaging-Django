@@ -87,7 +87,7 @@ def update_dashboard_signal_value(signal_name):
     return None
 
 def dashboard_pages():
-	return [{
+    return [{
         'title': 'Messages Log',
         'icon': 'forum',
 		'url': reverse('dashboard_messages_log_now'),
