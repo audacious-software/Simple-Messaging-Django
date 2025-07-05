@@ -55,10 +55,10 @@ requirejs(['material', 'jquery', 'base'], function (mdc) {
         $('#lookup_results').html('<em>No results found. Check your phone number and if the server is configured for lookups.</em>')
       } else {
         for (const result of data) {
-          let htmlString = '<div class="mdc-card" style="padding: 16px;">'
-          htmlString += `  <div class="mdc-typography--subtitle1"><strong>${result.number}</strong></div>`
-          htmlString += `  <div class="mdc-typography--body1">Number Type: ${result.type}</div>`
-          htmlString += `  <div class="mdc-typography--body1">Carrier: ${result.carrier}</div>`
+          let htmlString = '<div>'
+          htmlString += `   <div class="mdc-typography--subtitle1"><strong>${result.number}</strong></div>`
+          htmlString += `   <div class="mdc-typography--body1">Number Type: ${result.type}</div>`
+          htmlString += `   <div class="mdc-typography--body1">Carrier: ${result.carrier}</div>`
 
           if (result.notes !== undefined) {
             htmlString += `  <div class="mdc-typography--body2">Notes: ${result.notes}</div>`

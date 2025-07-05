@@ -5,7 +5,7 @@
 {% block 'page_title' %}Messages Log | {% simple_dashboard_site_name %}{% endblock %}
 {% block 'navigation_title' %}Messages Log{% endblock %}
 {% block 'main_content' %}
-	<div class="mdc-layout-grid">
+	<div class="mdc-layout-grid" style="padding-bottom: 0px;">
 		<div class="mdc-layout-grid__inner">
 			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
 				<div class="mdc-data-table" id="messages_table" style="width: 100%;">
@@ -36,7 +36,7 @@
 						<div class="mdc-data-table__pagination-trailing">
 							<div class="mdc-data-table__pagination-rows-per-page">
 								<div class="mdc-data-table__pagination-rows-per-page-label">
-									Messages per page
+									Dialogs per page
 								</div>
 
 								<div class="mdc-select mdc-select--outlined mdc-select--no-label mdc-data-table__pagination-rows-per-page-select">
@@ -74,18 +74,18 @@
 
 							<div class="mdc-data-table__pagination-navigation">
 								<div class="mdc-data-table__pagination-total">
-									1‑10 of 100
+									{{ start }} to {{ end }} of {{ total }}
 								</div>
-								<button class="mdc-icon-button material-icons mdc-data-table__pagination-button" data-first-page="true" disabled>
+								<button class="mdc-icon-button material-icons mdc-data-table__pagination-button" data-first-page="true" data-url="{{ first }}">
 									<div class="mdc-button__icon">first_page</div>
 								</button>
-								<button class="mdc-icon-button material-icons mdc-data-table__pagination-button" data-prev-page="true" disabled>
+								<button class="mdc-icon-button material-icons mdc-data-table__pagination-button" data-prev-page="true"  data-url="{{ previous }}" {% if previous %}{% else %}disabled{% endif %}>
 									<div class="mdc-button__icon">chevron_left</div>
 								</button>
-								<button class="mdc-icon-button material-icons mdc-data-table__pagination-button" data-next-page="true">
+								<button class="mdc-icon-button material-icons mdc-data-table__pagination-button" data-next-page="true" data-url="{{ next }}" {% if next %}{% else %}disabled{% endif %}>
 									<div class="mdc-button__icon">chevron_right</div>
 								</button>
-								<button class="mdc-icon-button material-icons mdc-data-table__pagination-button" data-last-page="true">
+								<button class="mdc-icon-button material-icons mdc-data-table__pagination-button" data-last-page="true"  data-url="{{ last }}">
 									<div class="mdc-button__icon">last_page</div>
 								</button>
 							</div>

@@ -90,7 +90,7 @@ def dashboard_pages():
     return [{
         'title': 'Messages Log',
         'icon': 'forum',
-        'url': reverse('dashboard_messages_log_now'),
+        'url': reverse('dashboard_messages_log'),
     }, {
         'title': 'Phone Lookup',
         'icon': 'travel_explore',

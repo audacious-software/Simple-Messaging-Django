@@ -481,7 +481,7 @@ class IncomingMessageMedia(models.Model):
 
         return 'Empty or malformed message attachment (check file permissions)'
 
-def fetch_messages(direction=None, query=None, destination=None, limit=50, offset=0, order='descending', pending=False): # pylint: disable=too-many-arguments, unused-argument
+def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False): # pylint: disable=too-many-arguments, unused-argument
     messages = []
 
     if direction in (None, 'incoming'):
@@ -491,9 +491,6 @@ def fetch_messages(direction=None, query=None, destination=None, limit=50, offse
             sort = 'receive_date'
 
         message_query = Q(pk__gte=0)
-
-        if query is not None:
-            message_query = message_query | Q(message__icontains=query)
 
         for incoming in IncomingMessage.objects.filter(message_query).order_by(sort):
             messages.append({
@@ -512,9 +509,6 @@ def fetch_messages(direction=None, query=None, destination=None, limit=50, offse
 
         message_query = Q(pk__gte=0)
 
-        if query is not None:
-            message_query = message_query | Q(message__icontains=query) # pylint: disable=unsupported-binary-operation
-
         for outgoing in OutgoingMessage.objects.filter(message_query).order_by(sort):
             messages.append({
                 'direction': 'outgoing',
@@ -524,24 +518,28 @@ def fetch_messages(direction=None, query=None, destination=None, limit=50, offse
                 'message': outgoing.message
             })
 
-    reverse_sort = False
+    reverse_sort = True
 
     if order == 'ascending':
-        reverse_sort = True
+        reverse_sort = False
+
+    if query is not None:
+        messages = list(filter(lambda msg: query in '|'.join([str(value) for value in msg.values()]), messages))
 
     messages.sort(key=lambda item: item['when'], reverse=reverse_sort)
 
-    if len(messages) < offset:
-        return []
-
-    return messages[offset:(offset + limit)]
+    return messages
 
 class DestinationProxy: # pylint: disable=old-style-class
-    def __init__(self, identifier, time_zone):
+    def __init__(self, identifier=None, destination=None, time_zone=settings.TIME_ZONE):
         self.identifier = identifier
+        self.destination = destination
         self.time_zone = time_zone
 
     def fetch_destination(self):
+        return self.destination
+
+    def fetch_identifier(self):
         return self.identifier
 
     def fetch_tz(self):
@@ -562,6 +560,6 @@ def fetch_destination_proxy(identifier):
                 pass
 
     if proxy is None:
-        proxy = DestinationProxy(identifier, settings.TIME_ZONE)
+        proxy = DestinationProxy(identifier=identifier, destination=identifier)
 
     return proxy

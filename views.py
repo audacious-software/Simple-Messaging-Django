@@ -340,13 +340,38 @@ def dashboard_lookup(request):
     return render(request, 'dashboard/dashboard_messages_lookup.html', context=context)
 
 @staff_member_required
-def dashboard_messages_log(request, start=None):
-    context = {}
+def dashboard_messages_log(request):
+    context = {
+        'include_search': True
+    }
 
-    if start is None:
-        return redirect('dashboard_messages_log', start=timezone.now().isoformat())
+    offset = int(request.GET.get('offset', '0'))
+    limit = int(request.GET.get('limit', '25'))
+    query = request.GET.get('q', None)
 
-    context['messages'] = fetch_messages()
+    messages = fetch_messages(query=query)
+
+    if query is None:
+        query = ''
+
+    total = len(messages)
+
+    context['messages'] = messages[offset:(offset + limit)]
+    context['start'] = offset + 1
+    context['end'] = min(len(messages), (offset + limit))
+    context['total'] = total
+
+    if (offset - limit) >= 0:
+        context['previous'] = '%s?offset=%s&limit=%s&q=%s' % (reverse('dashboard_messages_log'), offset - limit, limit, query)
+
+    if (offset + limit) < total:
+        context['next'] = '%s?offset=%s&limit=%s&q=%s' % (reverse('dashboard_messages_log'), offset + limit, limit, query)
+
+    context['first'] = '%s?offset=0&limit=%s&q=%s' % (reverse('dashboard_messages_log'), limit, query)
+
+    last = int(total / limit) * limit
+
+    context['last'] = '%s?offset=%s&limit=%s&q=%s' % (reverse('dashboard_messages_log'), last, limit, query)
 
     return render(request, 'dashboard/dashboard_messages_log.html', context=context)
 
@@ -407,4 +432,4 @@ def dashboard_broadcast(request): # pylint: disable=invalid-name
 
         return HttpResponse(json.dumps(response_json, indent=2), content_type='application/json')
 
-    return HttpResponseRedirect(reverse('dashboard_messages_log_now'))
+    return HttpResponseRedirect(reverse('dashboard_messages_log'))

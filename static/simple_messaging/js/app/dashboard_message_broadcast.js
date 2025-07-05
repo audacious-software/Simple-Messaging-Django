@@ -23,7 +23,7 @@ requirejs.config({
 })
 
 requirejs(['material', 'moment', 'jquery', 'base'], function (mdc, moment) {
-  const destinationsField = mdc.textField.MDCTextField.attachTo(document.getElementById('broadcast_destinations'))
+  window.broadcastDestinationsField = mdc.textField.MDCTextField.attachTo(document.getElementById('broadcast_destinations'))
   const broadcastMessageField = mdc.textField.MDCTextField.attachTo(document.getElementById('broadcast_message_field'))
 
   const broadcastWhenMessageField = mdc.textField.MDCTextField.attachTo(document.getElementById('broadcast_when_field'))
@@ -49,7 +49,7 @@ requirejs(['material', 'moment', 'jquery', 'base'], function (mdc, moment) {
 
     const identifiers = []
 
-    destinationsField.value.split(',').forEach(function (destination) {
+    window.broadcastDestinationsField.value.split(',').forEach(function (destination) {
       if (destination.trim() !== '') {
         identifiers.push(destination)
       }
