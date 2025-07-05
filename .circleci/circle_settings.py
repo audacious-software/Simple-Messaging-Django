@@ -6,7 +6,7 @@ Settings.py for testing on Travis CI.
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 import os
-import sys
+import tempfile
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -103,6 +103,8 @@ STATIC_ROOT = 'static'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = str(BASE_DIR) + '/media/'
 
+SIMPLE_DASHBOARD_SITE_NAME = 'Simple Messaging Testing'
+
 SIMPLE_DATA_EXPORTER_OBFUSCATE_IDENTIFIERS = True
 SIMPLE_DATA_EXPORTER_SITE_NAME = 'Simple Messaging Site'
 SIMPLE_MESSAGING_SECRET_KEY = 'changeme' # nosec
@@ -110,3 +112,5 @@ SIMPLE_MESSAGING_SECRET_KEY = 'changeme' # nosec
 SIMPLE_MESSAGING_COUNTRY_CODE = 'US'
 
 SITE_URL = 'https://' + ALLOWED_HOSTS[0]
+
+QUICKSILVER_LOCK_DIR =  tempfile.gettempdir()

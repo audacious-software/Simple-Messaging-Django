@@ -524,7 +524,7 @@ def fetch_messages(direction=None, query=None, destination=None, order='descendi
         reverse_sort = False
 
     if query is not None:
-        messages = list(filter(lambda msg: query in '|'.join([str(value) for value in msg.values()]), messages))
+        messages = list(filter(lambda msg: query in '|'.join([str(value) for value in msg.values()]), messages)) # pylint: disable=deprecated-lambda
 
     messages.sort(key=lambda item: item['when'], reverse=reverse_sort)
 
