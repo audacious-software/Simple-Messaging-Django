@@ -146,8 +146,8 @@ $(document).ready(function () {
 
   const fetchMessages = function (phone, success, since = 0) {
     const payload = {
-      phone: phone,
-      since: since
+      phone,
+      since
     }
 
     let loadMore = false
