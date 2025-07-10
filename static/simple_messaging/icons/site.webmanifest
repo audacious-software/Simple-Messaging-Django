@@ -1,0 +1,19 @@
+{
+    "name": "Simple Messaging Console",
+    "short_name": "Console",
+    "icons": [
+      {
+        "src": "/static/simple_messaging/icons/android-chrome-192x192.png",
+        "sizes": "192x192",
+        "type": "image/png"
+      },
+      {
+        "src": "/static/simple_messaging/icons/android-chrome-512x512.png",
+        "sizes": "512x512",
+        "type": "image/png"
+      }
+    ],
+    "theme_color": "#171717",
+    "background_color": "#171717",
+    "display": "standalone"
+  }

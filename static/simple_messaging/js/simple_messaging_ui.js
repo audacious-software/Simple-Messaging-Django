@@ -92,6 +92,10 @@ $(document).ready(function () {
       if (toScroll.includes(message.channel) === false) {
         toScroll.push(message.channel)
       }
+
+      if ($('#outgoing_earcon')[0].paused || $('#outgoing_earcon')[0].ended) {
+        $('#incoming_earcon')[0].play()
+      }
     })
 
     toScroll.forEach(function (channel) {
@@ -142,8 +146,8 @@ $(document).ready(function () {
 
   const fetchMessages = function (phone, success, since = 0) {
     const payload = {
-      phone: phone,
-      since: since
+      phone,
+      since
     }
 
     let loadMore = false
@@ -296,6 +300,10 @@ $(document).ready(function () {
     formData.append('message', message)
     formData.append('channel', window.selectedMessagingChannel)
     formData.append('attachment', attachment)
+
+    window.messageExtensionFunctions.forEach(function (extensionFunction) {
+      extensionFunction(formData)
+    })
 
     $.ajax({
       url: 'send.json',

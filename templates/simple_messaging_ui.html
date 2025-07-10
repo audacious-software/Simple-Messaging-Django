@@ -18,7 +18,11 @@
                 max-width: 960px;
             } */
         </style>
-    </head>
+		<link rel="apple-touch-icon" sizes="180x180" href="{% static 'simple_messaging/icons/apple-touch-icon.png' %}">
+		<link rel="icon" type="image/png" sizes="32x32" href="{% static 'simple_messaging/icons/favicon-32x32.png' %}">
+		<link rel="icon" type="image/png" sizes="16x16" href="{% static 'simple_messaging/icons/favicon-16x16.png' %}">
+		<link rel="manifest" href="{% static 'simple_messaging/icons/site.webmanifest' %}">
+	</head>
     <body class="bg-light">
         {% csrf_token %}
         <div class="container">
@@ -77,6 +81,8 @@
                 </div>
             </div>
         </div>
+		<audio id="incoming_earcon" src="{% static 'simple_messaging/earcons/incoming.mp3' %}" hidden></audio>
+		<audio id="outgoing_earcon" src="{% static 'simple_messaging/earcons/outgoing.mp3' %}" hidden></audio>
     </body>
     <script>
 		{% if identifier %}
@@ -88,11 +94,13 @@
 				window.lastPhone = "";
 			{% endif %}
 		{% endif %}
-		
+
 		window.simpleMessagingChannels = []
-		
+
+		window.messageExtensionFunctions = []
+
        	{% for channel in channels %}
 			window.simpleMessagingChannels.push(['{{ channel.0 }}', '{{ channel.1 }}',])
-		{% endfor %} 
+		{% endfor %}
 	</script>
 </html>

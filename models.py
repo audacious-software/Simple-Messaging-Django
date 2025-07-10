@@ -20,6 +20,7 @@ from six import python_2_unicode_compatible
 from django.conf import settings
 from django.core.checks import Error, Warning, register # pylint: disable=redefined-builtin
 from django.db import models
+from django.db.models import Q
 from django.template import Template, Context
 from django.utils import timezone
 from django.utils.encoding import smart_str
@@ -31,9 +32,10 @@ SIMPLE_MESSAGING_OUTGOING_MEDIA_FILE_FOLDER = 'outgoing_message_media'
 def check_data_export_parameters(app_configs, **kwargs): # pylint: disable=unused-argument
     errors = []
 
-    if hasattr(settings, 'SIMPLE_MESSAGING_COUNTRY_CODE') is False:
-        error = Error('SIMPLE_MESSAGING_COUNTRY_CODE parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_COUNTRY_CODE.', obj=None, id='simple_messaging.E001')
-        errors.append(error)
+    if ('simple_messaging_switchboard' in settings.INSTALLED_APPS) is False:
+        if hasattr(settings, 'SIMPLE_MESSAGING_COUNTRY_CODE') is False:
+            error = Error('SIMPLE_MESSAGING_COUNTRY_CODE parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_COUNTRY_CODE.', obj=None, id='simple_messaging.E001')
+            errors.append(error)
 
     return errors
 
@@ -99,32 +101,38 @@ def check_messaging_key(app_configs, **kwargs): # pylint: disable=unused-argumen
     errors = []
 
     if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY') is False:
-        error = Error('SIMPLE_MESSAGING_SECRET_KEY parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_SECRET_KEY.', obj=None, id='simple_messaging.E002')
+        error = Warning('SIMPLE_MESSAGING_SECRET_KEY parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_SECRET_KEY.', obj=None, id='simple_messaging.W002')
         errors.append(error)
 
     return errors
 
 def decrypt_value(stored_text):
-    key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
+    if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+        key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
 
-    box = SecretBox(key)
+        box = SecretBox(key)
 
-    ciphertext = base64.b64decode(stored_text.replace('secret:', '', 1))
+        ciphertext = base64.b64decode(stored_text.replace('secret:', '', 1))
 
-    cleartext = box.decrypt(ciphertext)
+        cleartext = box.decrypt(ciphertext)
 
-    return smart_str(cleartext)
+        return smart_str(cleartext)
+
+    return stored_text
 
 def encrypt_value(cleartext):
-    key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
+    if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY'):
+        key = base64.b64decode(settings.SIMPLE_MESSAGING_SECRET_KEY) # getpass.getpass('Enter secret backup key: ')
 
-    box = SecretBox(key)
+        box = SecretBox(key)
 
-    uft8_bytes = cleartext.encode('utf-8')
+        uft8_bytes = cleartext.encode('utf-8')
 
-    ciphertext = box.encrypt(uft8_bytes)
+        ciphertext = box.encrypt(uft8_bytes)
 
-    return 'secret:' + smart_str(base64.b64encode(ciphertext))
+        return 'secret:' + smart_str(base64.b64encode(ciphertext))
+
+    return cleartext
 
 @python_2_unicode_compatible
 class OutgoingMessage(models.Model):
@@ -269,7 +277,7 @@ class OutgoingMessage(models.Model):
         if self.message.startswith('secret:') is False:
             self.update_message(self.message, force=True)
 
-    def transmit(self): # pylint: disable=too-many-branches
+    def transmit(self): # pylint: disable=too-many-branches, too-many-statements
         if self.sent_date is not None:
             raise Exception('Message (pk=' + str(self.pk) + ') already transmitted on ' + self.sent_date.isoformat() + '.') # pylint: disable=broad-exception-raised
 
@@ -286,7 +294,7 @@ class OutgoingMessage(models.Model):
             except AttributeError:
                 pass
 
-        try:
+        try: # pylint: disable=too-many-nested-blocks
             processed = False
             processed_metadata = {}
 
@@ -298,8 +306,12 @@ class OutgoingMessage(models.Model):
                         metadata = response_module.process_outgoing_message(self)
 
                         if metadata is not None:
-                            processed = True
                             processed_metadata.update(metadata)
+
+                            if self.errored is False:
+                                processed = True
+                            else:
+                                break
                     except ImportError:
                         pass
                     except AttributeError:
@@ -310,16 +322,17 @@ class OutgoingMessage(models.Model):
             if self.transmission_metadata is not None and self.transmission_metadata.strip() != '':
                 transmission_metadata = json.loads(self.transmission_metadata)
 
-            if processed:
-                transmission_metadata.update(processed_metadata)
+            self.sent_date = timezone.now()
 
-                self.sent_date = timezone.now()
+            transmission_metadata.update(processed_metadata)
 
-                self.errored = False
-            else:
+            if processed is False:
                 self.errored = True
 
-                transmission_metadata['error'] = 'No processor found for message.'
+                if len(processed_metadata) == 0: # pylint: disable=len-as-condition
+                    transmission_metadata['error'] = 'No processor found for message.'
+                else:
+                    transmission_metadata['error'] = 'Error in processing message.'
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
@@ -333,7 +346,9 @@ class OutgoingMessage(models.Model):
             if self.transmission_metadata is not None and self.transmission_metadata.strip() != '':
                 transmission_metadata = json.loads(self.transmission_metadata)
 
-            transmission_metadata['error'] = traceback.format_exc().splitlines()
+            transmission_metadata['error'] = 'Error in processing message.'
+
+            transmission_metadata['traceback'] = traceback.format_exc().splitlines()
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
@@ -476,3 +491,86 @@ class BlockedSender(models.Model):
 
     def __str__(self):
         return self.sender
+
+def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False): # pylint: disable=too-many-arguments, unused-argument
+    messages = []
+
+    if direction in (None, 'incoming'):
+        sort = '-receive_date'
+
+        if order == 'ascending':
+            sort = 'receive_date'
+
+        message_query = Q(pk__gte=0)
+
+        for incoming in IncomingMessage.objects.filter(message_query).order_by(sort):
+            messages.append({
+                'direction': 'incoming',
+                'sender': incoming.current_sender(),
+                'destination': incoming.recipient,
+                'when': incoming.receive_date,
+                'message': incoming.message
+            })
+
+    if direction in (None, 'outgoing'):
+        sort = '-sent_date'
+
+        if order == 'ascending':
+            sort = 'sent_date'
+
+        message_query = Q(pk__gte=0)
+
+        for outgoing in OutgoingMessage.objects.filter(message_query).order_by(sort):
+            messages.append({
+                'direction': 'outgoing',
+                'sender': 'system',
+                'destination': outgoing.current_destination(),
+                'when': outgoing.sent_date,
+                'message': outgoing.message
+            })
+
+    reverse_sort = True
+
+    if order == 'ascending':
+        reverse_sort = False
+
+    if query is not None:
+        messages = list(filter(lambda msg: query in '|'.join([str(value) for value in msg.values()]), messages)) # pylint: disable=deprecated-lambda
+
+    messages.sort(key=lambda item: item['when'], reverse=reverse_sort)
+
+    return messages
+
+class DestinationProxy: # pylint: disable=old-style-class
+    def __init__(self, identifier=None, destination=None, time_zone=settings.TIME_ZONE):
+        self.identifier = identifier
+        self.destination = destination
+        self.time_zone = time_zone
+
+    def fetch_destination(self):
+        return self.destination
+
+    def fetch_identifier(self):
+        return self.identifier
+
+    def fetch_tz(self):
+        return self.time_zone
+
+def fetch_destination_proxy(identifier):
+    proxy = None
+
+    for app in settings.INSTALLED_APPS:
+        if proxy is None:
+            try:
+                messaging_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                proxy = messaging_module.fetch_destination_proxy(identifier)
+            except ImportError:
+                pass
+            except AttributeError:
+                pass
+
+    if proxy is None:
+        proxy = DestinationProxy(identifier=identifier, destination=identifier)
+
+    return proxy
