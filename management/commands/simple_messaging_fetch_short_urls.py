@@ -27,9 +27,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         pass
 
+    @handle_schedule
     @handle_lock
     @log_scheduled_event
-    @handle_schedule
     def handle(self, *args, **options):
         if hasattr(settings, 'SHORT_URL_SIGNING_KEY') and hasattr(settings, 'SHORT_URL_FETCH_URL'):
             signing_key = SigningKey(binascii.unhexlify(settings.SHORT_URL_SIGNING_KEY))

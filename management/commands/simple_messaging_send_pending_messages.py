@@ -15,9 +15,9 @@ class Command(BaseCommand):
     def add_arguments(self, parser):
         pass
 
+    @handle_schedule
     @handle_lock
     @log_scheduled_event
-    @handle_schedule
     def handle(self, *args, **options):
         now = timezone.now()
 
