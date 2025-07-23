@@ -6,7 +6,6 @@ orbs:
 
 workflows:
   build:
-    resource_class: medium+
     jobs:
       - build-39
       - build-38
@@ -16,7 +15,9 @@ workflows:
 
 jobs:
   build-39:
+    resource_class: medium+
     docker:
+
       - image: cimg/python:3.9
       - image: cimg/postgres:12.18-postgis
         auth:
@@ -81,6 +82,7 @@ jobs:
           destination: python_app
 
   build-38:
+    resource_class: medium+
     docker:
       - image: cimg/python:3.8
       - image: cimg/postgres:12.18-postgis
@@ -146,6 +148,7 @@ jobs:
           destination: python_app
 
   build-37:
+    resource_class: medium+
     docker:
       - image: cimg/python:3.7
       - image: cimg/postgres:9.6.24-postgis
@@ -211,6 +214,7 @@ jobs:
           destination: python_app
 
   build-36:
+    resource_class: medium+
     docker:
       - image: cimg/python:3.6
       - image: cimg/postgres:9.6.24-postgis
@@ -276,6 +280,7 @@ jobs:
           destination: python_app
 
   build-27:
+    resource_class: medium+
     docker:
       - image: cimg/python:2.7
       - image: cimg/postgres:9.6.24-postgis
