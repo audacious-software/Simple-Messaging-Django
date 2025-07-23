@@ -51,7 +51,7 @@ requirejs(['material', 'moment', 'jquery', 'base'], function (mdc, moment) {
 
     window.broadcastDestinationsField.value.split(',').forEach(function (destination) {
       if (destination.trim() !== '') {
-        identifiers.push(destination)
+        identifiers.push(destination.trim())
       }
     })
 
