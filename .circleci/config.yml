@@ -6,6 +6,7 @@ orbs:
 
 workflows:
   build:
+    resource_class: medium+
     jobs:
       - build-39
       - build-38
