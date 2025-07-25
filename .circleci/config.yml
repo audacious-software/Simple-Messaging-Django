@@ -52,21 +52,26 @@ jobs:
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            echo "Starting Django project..."
             django-admin startproject sm
+            echo "Copying over packages..."
             mv simple_messaging sm/simple_messaging
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
+            echo "Setting up site..."
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
+            echo "Setting up database..."
             python manage.py migrate
             python manage.py install_quicksilver_tasks
             python manage.py simple_dashboard_update_values
             python manage.py test
+            echo "Testing..."
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
             bandit -r .
@@ -116,21 +121,26 @@ jobs:
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            echo "Starting Django project..."
             django-admin startproject sm
+            echo "Copying over packages..."
             mv simple_messaging sm/simple_messaging
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
+            echo "Setting up site..."
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
+            echo "Setting up database..."
             python manage.py migrate
             python manage.py install_quicksilver_tasks
             python manage.py simple_dashboard_update_values
             python manage.py test
+            echo "Testing..."
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
             bandit -r .
@@ -179,21 +189,26 @@ jobs:
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            echo "Starting Django project..."
             django-admin startproject sm
+            echo "Copying over packages..."
             mv simple_messaging sm/simple_messaging
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
+            echo "Setting up site..."
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
+            echo "Setting up database..."
             python manage.py migrate
             python manage.py install_quicksilver_tasks
             python manage.py simple_dashboard_update_values
             python manage.py test
+            echo "Testing..."
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
             bandit -r .
@@ -242,21 +257,26 @@ jobs:
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            echo "Starting Django project..."
             django-admin startproject sm
+            echo "Copying over packages..."
             mv simple_messaging sm/simple_messaging
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
+            echo "Setting up site..."
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
+            echo "Setting up database..."
             python manage.py migrate
             python manage.py install_quicksilver_tasks
             python manage.py simple_dashboard_update_values
             python manage.py test
+            echo "Testing..."
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
             bandit -r .
@@ -305,21 +325,26 @@ jobs:
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            echo "Starting Django project..."
             django-admin startproject sm
+            echo "Copying over packages..."
             mv simple_messaging sm/simple_messaging
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
+            echo "Setting up site..."
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
+            echo "Setting up database..."
             python manage.py migrate
             python manage.py install_quicksilver_tasks
             python manage.py simple_dashboard_update_values
             python manage.py test
+            echo "Testing..."
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
             bandit -r .
@@ -368,21 +393,26 @@ jobs:
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            echo "Starting Django project..."
             django-admin startproject sm
+            echo "Copying over packages..."
             mv simple_messaging sm/simple_messaging
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
+            echo "Setting up site..."
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
+            echo "Setting up database..."
             python manage.py migrate
             python manage.py install_quicksilver_tasks
             python manage.py simple_dashboard_update_values
             python manage.py test
+            echo "Testing..."
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
             bandit -r .
@@ -433,21 +463,26 @@ jobs:
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            echo "Starting Django project..."
             django-admin startproject sm
+            echo "Copying over packages..."
             mv simple_messaging sm/simple_messaging
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
+            echo "Setting up site..."
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
             mkdir -p media/incoming_message_media
             mkdir -p media/outgoing_message_media
+            echo "Setting up database..."
             python manage.py migrate
             python manage.py install_quicksilver_tasks
             python manage.py simple_dashboard_update_values
             python manage.py test
+            echo "Testing..."
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
             bandit -r .
