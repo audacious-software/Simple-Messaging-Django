@@ -76,7 +76,7 @@ jobs:
             pylint simple_messaging
             bandit -r .
       - save_cache:
-          key: venv-312-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
+          key: venv-312-{{ .Branch }}-{{ checksum "/home/circleci/sm/simple_messaging/requirements.txt" }}
           paths:
             - "/home/circleci/venv"
       - store_test_results:
@@ -145,7 +145,7 @@ jobs:
             pylint simple_messaging
             bandit -r .
       - save_cache:
-          key: venv-310-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
+          key: venv-310-{{ .Branch }}-{{ checksum "/home/circleci/sm/simple_messaging/requirements.txt" }}
           paths:
             - "/home/circleci/venv"
       - store_test_results:
@@ -213,7 +213,7 @@ jobs:
             pylint simple_messaging
             bandit -r .
       - save_cache:
-          key: venv-39-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
+          key: venv-39-{{ .Branch }}-{{ checksum "/home/circleci/sm/simple_messaging/requirements.txt" }}
           paths:
             - "/home/circleci/venv"
       - store_test_results:
@@ -281,7 +281,7 @@ jobs:
             pylint simple_messaging
             bandit -r .
       - save_cache:
-          key: venv-38-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
+          key: venv-38-{{ .Branch }}-{{ checksum "/home/circleci/sm/simple_messaging/requirements.txt" }}
           paths:
             - "/home/circleci/venv"
       - store_test_results:
@@ -349,7 +349,7 @@ jobs:
             pylint simple_messaging
             bandit -r .
       - save_cache:
-          key: venv-37-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
+          key: venv-37-{{ .Branch }}-{{ checksum "/home/circleci/sm/simple_messaging/requirements.txt" }}
           paths:
             - "/home/circleci/venv"
       - store_test_results:
@@ -417,7 +417,7 @@ jobs:
             pylint simple_messaging
             bandit -r .
       - save_cache:
-          key: venv-36-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
+          key: venv-36-{{ .Branch }}-{{ checksum "/home/circleci/sm/simple_messaging/requirements.txt" }}
           paths:
             - "/home/circleci/venv"
       - store_test_results:
@@ -487,7 +487,7 @@ jobs:
             pylint simple_messaging
             bandit -r .
       - save_cache:
-          key: venv-27-{{ .Branch }}-{{ checksum "/home/circleci/django/sm/simple_messaging/requirements.txt" }}
+          key: venv-27-{{ .Branch }}-{{ checksum "/home/circleci/sm/simple_messaging/requirements.txt" }}
           paths:
             - "/home/circleci/venv"
       - store_test_results:
