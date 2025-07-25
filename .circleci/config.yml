@@ -53,12 +53,9 @@ jobs:
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
-            pip install -r quicksilver/requirements.txt
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
-            pip install -r simple_data_export/requirements.txt
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            pip install -r simple_dashboard/requirements.txt
-            pip install -r simple_messaging/requirements.txt
+            pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -119,12 +116,9 @@ jobs:
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
-            pip install -r quicksilver/requirements.txt
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
-            pip install -r simple_data_export/requirements.txt
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            pip install -r simple_dashboard/requirements.txt
-            pip install -r simple_messaging/requirements.txt
+            pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -185,12 +179,9 @@ jobs:
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
-            pip install -r quicksilver/requirements.txt
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
-            pip install -r simple_data_export/requirements.txt
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            pip install -r simple_dashboard/requirements.txt
-            pip install -r simple_messaging/requirements.txt
+            pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -251,12 +242,9 @@ jobs:
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
-            pip install -r quicksilver/requirements.txt
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
-            pip install -r simple_data_export/requirements.txt
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            pip install -r simple_dashboard/requirements.txt
-            pip install -r simple_messaging/requirements.txt
+            pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -319,12 +307,9 @@ jobs:
             mv ../simple_messaging sm
             cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
-            pip install -r quicksilver/requirements.txt
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
-            pip install -r simple_data_export/requirements.txt
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            pip install -r simple_dashboard/requirements.txt
-            pip install -r simple_messaging/requirements.txt
+            pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
