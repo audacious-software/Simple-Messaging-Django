@@ -57,7 +57,6 @@ jobs:
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
-            mv simple_messaging sm/simple_messaging
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
@@ -122,7 +121,6 @@ jobs:
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
-            mv simple_messaging sm/simple_messaging
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
@@ -186,7 +184,6 @@ jobs:
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
-            mv simple_messaging sm/simple_messaging
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
@@ -250,7 +247,6 @@ jobs:
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
-            mv simple_messaging sm/simple_messaging
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
@@ -314,7 +310,6 @@ jobs:
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
-            mv simple_messaging sm/simple_messaging
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
@@ -378,7 +373,6 @@ jobs:
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
-            mv simple_messaging sm/simple_messaging
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
@@ -444,7 +438,6 @@ jobs:
             mv quicksilver sm/quicksilver
             mv simple_data_export sm/simple_data_export
             mv simple_dashboard sm/simple_dashboard
-            mv simple_messaging sm/simple_messaging
             cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
