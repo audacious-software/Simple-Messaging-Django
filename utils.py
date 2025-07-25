@@ -25,7 +25,7 @@ def split_by_paragraphs(original_text, target_bundle_size, max_bundle_size):
             else:
                 current_bundle = updated_bundle
 
-    if len(current_bundle) > 0:
+    if len(current_bundle) > 0: # pylint: disable=len-as-condition
         bundles.append(current_bundle)
 
     return bundles
@@ -53,7 +53,7 @@ def split_by_sentences(original_text, target_bundle_size, max_bundle_size):
             else:
                 current_bundle = updated_bundle
 
-    if len(current_bundle) > 0:
+    if len(current_bundle) > 0: # pylint: disable=len-as-condition
         bundles.append(current_bundle)
 
     return bundles
@@ -81,7 +81,7 @@ def split_by_space(original_text, target_bundle_size, max_bundle_size):
             else:
                 current_bundle = updated_bundle
 
-    if len(current_bundle) > 0:
+    if len(current_bundle) > 0: # pylint: disable=len-as-condition
         bundles.append(current_bundle)
 
     return bundles
