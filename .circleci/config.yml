@@ -233,7 +233,7 @@ jobs:
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
             pip install --upgrade pip
-            pip install -r requirements.txt
+            pip install Django
             cd ..
             mv project simple_messaging
             mkdir django
@@ -298,7 +298,7 @@ jobs:
             virtualenv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
             pip install --upgrade pip
-            pip install -r requirements.txt
+            pip install Django
             cd ..
             mv project simple_messaging
             mkdir django
@@ -309,7 +309,7 @@ jobs:
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            pip -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
