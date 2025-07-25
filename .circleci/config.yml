@@ -45,19 +45,20 @@ jobs:
             sudo apt-get update && sudo apt-get install -y gdal-bin
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
-            pip install --upgrade pip
-            pip install Django
+            pip install --upgrade pip wheel
             cd ..
             mv project simple_messaging
-            mkdir django
-            cd django
-            django-admin startproject sm
-            mv ../simple_messaging sm
-            cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            django-admin startproject sm
+            mv ../simple_messaging sm/simple_messaging
+            mv ../quicksilver sm/quicksilver
+            mv ../simple_data_export sm/simple_data_export
+            mv ../simple_dashboard sm/simple_dashboard
+            mv ../simple_messaging sm/simple_messaging
+            cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -109,19 +110,20 @@ jobs:
             sudo apt-get update && sudo apt-get install -y gdal-bin
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
-            pip install --upgrade pip
-            pip install Django
+            pip install --upgrade pip wheel
             cd ..
             mv project simple_messaging
-            mkdir django
-            cd django
-            django-admin startproject sm
-            mv ../simple_messaging sm
-            cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            django-admin startproject sm
+            mv ../simple_messaging sm/simple_messaging
+            mv ../quicksilver sm/quicksilver
+            mv ../simple_data_export sm/simple_data_export
+            mv ../simple_dashboard sm/simple_dashboard
+            mv ../simple_messaging sm/simple_messaging
+            cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -147,7 +149,6 @@ jobs:
   build-39:
     resource_class: medium+
     docker:
-
       - image: cimg/python:3.9
       - image: cimg/postgres:12.18-postgis
         auth:
@@ -173,19 +174,20 @@ jobs:
             sudo apt-get update && sudo apt-get install -y gdal-bin
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
-            pip install --upgrade pip
-            pip install Django
+            pip install --upgrade pip wheel
             cd ..
             mv project simple_messaging
-            mkdir django
-            cd django
-            django-admin startproject sm
-            mv ../simple_messaging sm
-            cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            django-admin startproject sm
+            mv ../simple_messaging sm/simple_messaging
+            mv ../quicksilver sm/quicksilver
+            mv ../simple_data_export sm/simple_data_export
+            mv ../simple_dashboard sm/simple_dashboard
+            mv ../simple_messaging sm/simple_messaging
+            cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -236,19 +238,20 @@ jobs:
             sudo apt-get update && sudo apt-get install -y gdal-bin
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
-            pip install --upgrade pip
-            pip install Django
+            pip install --upgrade pip wheel
             cd ..
             mv project simple_messaging
-            mkdir django
-            cd django
-            django-admin startproject sm
-            mv ../simple_messaging sm
-            cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            django-admin startproject sm
+            mv ../simple_messaging sm/simple_messaging
+            mv ../quicksilver sm/quicksilver
+            mv ../simple_data_export sm/simple_data_export
+            mv ../simple_dashboard sm/simple_dashboard
+            mv ../simple_messaging sm/simple_messaging
+            cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -299,19 +302,20 @@ jobs:
             sudo apt-get update && sudo apt-get install -y gdal-bin
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
-            pip install --upgrade pip
-            pip install Django
+            pip install --upgrade pip wheel
             cd ..
             mv project simple_messaging
-            mkdir django
-            cd django
-            django-admin startproject sm
-            mv ../simple_messaging sm
-            cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            django-admin startproject sm
+            mv ../simple_messaging sm/simple_messaging
+            mv ../quicksilver sm/quicksilver
+            mv ../simple_data_export sm/simple_data_export
+            mv ../simple_dashboard sm/simple_dashboard
+            mv ../simple_messaging sm/simple_messaging
+            cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -362,19 +366,20 @@ jobs:
             sudo apt-get update && sudo apt-get install -y gdal-bin
             python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
-            pip install --upgrade pip
-            pip install Django
+            pip install --upgrade pip wheel
             cd ..
             mv project simple_messaging
-            mkdir django
-            cd django
-            django-admin.py startproject sm
-            mv ../simple_messaging sm
-            cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
             pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            django-admin startproject sm
+            mv ../simple_messaging sm/simple_messaging
+            mv ../quicksilver sm/quicksilver
+            mv ../simple_data_export sm/simple_data_export
+            mv ../simple_dashboard sm/simple_dashboard
+            mv ../simple_messaging sm/simple_messaging
+            cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
@@ -425,21 +430,22 @@ jobs:
           name: Build and validate
           command: |
             sudo apt-get update && sudo apt-get install -y gdal-bin
-            virtualenv /home/circleci/venv --copies
+            python3 -m venv /home/circleci/venv --copies
             . /home/circleci/venv/bin/activate
-            pip install --upgrade pip
-            pip install Django
+            pip install --upgrade pip wheel
             cd ..
             mv project simple_messaging
-            mkdir django
-            cd django
-            django-admin.py startproject sm
-            mv ../simple_messaging sm
-            cd sm
             git clone https://github.com/audacious-software/Quicksilver-Django.git quicksilver
             git clone https://github.com/audacious-software/Simple-Data-Export-Django.git simple_data_export
             git clone https://github.com/audacious-software/Simple-Dashboard-Django.git simple_dashboard
-            pip -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            pip install -r simple_messaging/requirements.txt -r quicksilver/requirements.txt -r simple_data_export/requirements.txt -r simple_dashboard/requirements.txt
+            django-admin startproject sm
+            mv ../simple_messaging sm/simple_messaging
+            mv ../quicksilver sm/quicksilver
+            mv ../simple_data_export sm/simple_data_export
+            mv ../simple_dashboard sm/simple_dashboard
+            mv ../simple_messaging sm/simple_messaging
+            cd sm
             cp simple_messaging/.circleci/circle_settings.py sm/settings.py
             cp simple_messaging/.circleci/circle_urls.py sm/urls.py
             mkdir -p media/simple_data_export_uploads
