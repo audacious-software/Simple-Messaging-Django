@@ -68,9 +68,9 @@ jobs:
             mkdir -p media/outgoing_message_media
             echo "Setting up database..."
             python manage.py migrate
-            python manage.py install_quicksilver_tasks
-            python manage.py simple_dashboard_update_values
-            python manage.py test
+            python manage.py install_quicksilver_tasks -v 3
+            python manage.py simple_dashboard_update_values -v 3
+            python manage.py test -v 3
             echo "Testing..."
             cp simple_messaging/.pylintrc .
             pylint simple_messaging
