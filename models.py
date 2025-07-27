@@ -490,7 +490,7 @@ class BlockedSender(models.Model):
     notes = models.TextField(blank=True, null=True)
 
     def __str__(self):
-        return self.sender
+        return '%s' % self.sender
 
 def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False): # pylint: disable=too-many-arguments, unused-argument
     messages = []
