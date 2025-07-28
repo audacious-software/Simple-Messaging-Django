@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long, no-member, len-as-condition
+# pylint: disable=line-too-long, no-member, len-as-condition, import-outside-toplevel
 
 import datetime
 
@@ -26,7 +26,7 @@ def dashboard_template(signal_name):
 
     return None
 
-def update_dashboard_signal_value(signal_name):
+def update_dashboard_signal_value(signal_name): # pylint: disable=too-many-locals
     try:
         from simple_dashboard.models import DashboardSignal
 
