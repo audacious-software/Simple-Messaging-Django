@@ -8,8 +8,6 @@ from django.conf import settings
 from django.urls import reverse
 from django.utils import timezone
 
-from simple_dashboard.models import DashboardSignal
-
 from .models import IncomingMessage, OutgoingMessage
 
 def dashboard_signals():
@@ -29,60 +27,65 @@ def dashboard_template(signal_name):
     return None
 
 def update_dashboard_signal_value(signal_name):
-    if signal_name == 'Daily Message Traffic':
-        start_date = None
+    try:
+        from simple_dashboard.models import DashboardSignal
 
-        first_outgoing = OutgoingMessage.objects.all().order_by('send_date').first()
+        if signal_name == 'Daily Message Traffic':
+            start_date = None
 
-        if first_outgoing is not None:
-            start_date = first_outgoing.send_date
+            first_outgoing = OutgoingMessage.objects.all().order_by('send_date').first()
 
-        first_incoming = IncomingMessage.objects.all().order_by('receive_date').first()
+            if first_outgoing is not None:
+                start_date = first_outgoing.send_date
 
-        if first_incoming is not None and first_incoming.receive_date < start_date:
-            start_date = first_incoming.receive_date
+            first_incoming = IncomingMessage.objects.all().order_by('receive_date').first()
 
-        here_tz = pytz.timezone(settings.TIME_ZONE)
+            if first_incoming is not None and first_incoming.receive_date < start_date:
+                start_date = first_incoming.receive_date
 
-        today = timezone.now().astimezone(here_tz).date()
+            here_tz = pytz.timezone(settings.TIME_ZONE)
 
-        if start_date is None:
-            start_date = timezone.now() - datetime.timedelta(days=7)
+            today = timezone.now().astimezone(here_tz).date()
 
-        start_date = start_date.astimezone(here_tz).date()
+            if start_date is None:
+                start_date = timezone.now() - datetime.timedelta(days=7)
 
-        signal = DashboardSignal.objects.filter(name='Daily Message Traffic').first()
+            start_date = start_date.astimezone(here_tz).date()
 
-        if signal is not None:
-            window_size = signal.configuration.get('window_size', 60)
+            signal = DashboardSignal.objects.filter(name='Daily Message Traffic').first()
 
-            window_start = today - datetime.timedelta(days=window_size)
+            if signal is not None:
+                window_size = signal.configuration.get('window_size', 60)
 
-            start_date = max(start_date, window_start)
+                window_start = today - datetime.timedelta(days=window_size)
 
-        messages = []
+                start_date = max(start_date, window_start)
 
-        while start_date <= today:
-            day_start = datetime.time(0, 0, 0, 0)
+            messages = []
 
-            lookup_start = here_tz.localize(datetime.datetime.combine(start_date, day_start))
+            while start_date <= today:
+                day_start = datetime.time(0, 0, 0, 0)
 
-            day_end = datetime.time(23, 59, 59, 999999)
+                lookup_start = here_tz.localize(datetime.datetime.combine(start_date, day_start))
 
-            lookup_end = here_tz.localize(datetime.datetime.combine(start_date, day_end))
+                day_end = datetime.time(23, 59, 59, 999999)
 
-            day_log = {
-                'date': start_date.isoformat(),
-                'incoming_count': IncomingMessage.objects.filter(receive_date__gte=lookup_start, receive_date__lte=lookup_end).count(),
-                'outgoing_count': OutgoingMessage.objects.filter(sent_date__gte=lookup_start, sent_date__lte=lookup_end, errored=False).count(),
-                'error_count': OutgoingMessage.objects.filter(sent_date__gte=lookup_start, sent_date__lte=lookup_end, errored=True).count(),
-            }
+                lookup_end = here_tz.localize(datetime.datetime.combine(start_date, day_end))
 
-            messages.append(day_log)
+                day_log = {
+                    'date': start_date.isoformat(),
+                    'incoming_count': IncomingMessage.objects.filter(receive_date__gte=lookup_start, receive_date__lte=lookup_end).count(),
+                    'outgoing_count': OutgoingMessage.objects.filter(sent_date__gte=lookup_start, sent_date__lte=lookup_end, errored=False).count(),
+                    'error_count': OutgoingMessage.objects.filter(sent_date__gte=lookup_start, sent_date__lte=lookup_end, errored=True).count(),
+                }
 
-            start_date += datetime.timedelta(days=1)
+                messages.append(day_log)
 
-        return messages
+                start_date += datetime.timedelta(days=1)
+
+            return messages
+    except ImportError:
+        pass
 
     return None
 
