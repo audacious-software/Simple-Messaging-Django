@@ -481,6 +481,17 @@ class IncomingMessageMedia(models.Model):
 
         return 'Empty or malformed message attachment (check file permissions)'
 
+@python_2_unicode_compatible
+class BlockedSender(models.Model):
+    sender = models.CharField(max_length=256)
+
+    blocked = models.DateTimeField()
+
+    notes = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return '%s' % self.sender
+
 def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False): # pylint: disable=too-many-arguments, unused-argument
     messages = []
 
