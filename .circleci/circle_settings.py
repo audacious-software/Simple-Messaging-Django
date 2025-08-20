@@ -113,4 +113,4 @@ SIMPLE_MESSAGING_COUNTRY_CODE = 'US'
 
 SITE_URL = 'https://' + ALLOWED_HOSTS[0]
 
-QUICKSILVER_LOCK_DIR =  tempfile.gettempdir()
+QUICKSILVER_LOCK_DIR = tempfile.gettempdir()
