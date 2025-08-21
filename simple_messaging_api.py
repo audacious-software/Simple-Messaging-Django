@@ -1,3 +1,5 @@
+# pylint: disable=line-too-long
+
 import binascii
 import json
 
