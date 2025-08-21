@@ -26,13 +26,21 @@ $(document).ready(function () {
       const formattedTime = moment(message.timestamp * 1000).format('MMMM Do YYYY, h:mm:ss a')
 
       if (message.direction === 'from-user') {
+        let bgClass = 'bg-secondary'
+        let errorIcon = ''
+
+        if (message.error) {
+          bgClass = 'bg-danger'
+          errorIcon = '(Error encountered sending message&#8230;)'
+        }
+
         itemHtml += '<div class="row mt-3" data-timestamp="' + message.timestamp + '">'
         itemHtml += '    <div class="col-md-8">'
-        itemHtml += '      <div class="card text-white bg-secondary">'
+        itemHtml += `      <div class="card text-white ${bgClass}" style="border-radius: 16px 16px 16px 4px;">`
         itemHtml += '        <div class="card-body">'
 
         if (message.message !== undefined && message.message !== '') {
-          itemHtml += '          <p class="card-text">' + message.message + '</p>'
+          itemHtml += '          <p class="card-text">' + message.message.replaceAll('\n', '<br />') + '</p>'
         }
 
         $.each(message.media_urls, function (index, mediaUrl) {
@@ -47,7 +55,7 @@ $(document).ready(function () {
           }
         })
 
-        itemHtml += '          <small>' + formattedTime + '</small>'
+        itemHtml += '          <small>' + formattedTime + ' ' + errorIcon + '</small>'
         itemHtml += '        </div>'
         itemHtml += '      </div>'
         itemHtml += '    </div>'
@@ -56,15 +64,23 @@ $(document).ready(function () {
         itemHtml += '  </div>'
         itemHtml += '</div>'
       } else {
+        let bgClass = 'bg-primary'
+        let errorIcon = ''
+
+        if (message.error) {
+          bgClass = 'bg-danger'
+          errorIcon = '(Error encountered sending message&#8230;)'
+        }
+
         itemHtml += '<div class="row mt-3"  data-timestamp="' + message.timestamp + '">'
         itemHtml += '    <div class="col-md-4">'
         itemHtml += '    </div>'
         itemHtml += '    <div class="col-md-8">'
-        itemHtml += '      <div class="card text-white bg-primary">'
+        itemHtml += `      <div class="card text-white ${bgClass}" style="border-radius: 16px 16px 4px 16px;">`
         itemHtml += '        <div class="card-body">'
 
         if (message.message !== undefined && message.message !== '') {
-          itemHtml += '          <p class="card-text">' + message.message + '</p>'
+          itemHtml += '          <p class="card-text">' + message.message.replaceAll('\n', '<br />') + '</p>'
         }
 
         $.each(message.media_urls, function (index, mediaUrl) {
@@ -79,7 +95,7 @@ $(document).ready(function () {
           }
         })
 
-        itemHtml += '          <small>' + formattedTime + '</small>'
+        itemHtml += '          <small>' + formattedTime + ' ' + errorIcon + '</small>'
         itemHtml += '        </div>'
         itemHtml += '      </div>'
         itemHtml += '    </div>'

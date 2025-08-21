@@ -10,7 +10,7 @@ from django.conf import settings
 
 def fetch_short_url_metadata(outgoing_message):
     return {
-        'simple_messaging.OutgoingMessage': '%s:OutgoingMessage:%s' % (settings.ALLOWED_HOSTS[0], outgoing_message.pk,)
+        'simple_messaging.OutgoingMessage': '%s:%s' % (settings.ALLOWED_HOSTS[0], outgoing_message.pk,)
     }
 
 def shorten_url(long_url, tracking_code=None, metadata=None): # pylint: disable=too-many-branches
