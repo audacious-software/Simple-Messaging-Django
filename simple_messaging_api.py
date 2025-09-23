@@ -4,8 +4,8 @@ import binascii
 import json
 
 import requests
+import six
 
-from future.moves.urllib.parse import urlparse
 from nacl.signing import SigningKey
 
 from django.conf import settings
@@ -17,8 +17,8 @@ def fetch_short_url_metadata(outgoing_message):
 
 def shorten_url(long_url, tracking_code=None, metadata=None): # pylint: disable=too-many-branches
     if hasattr(settings, 'SHORT_URL_SIGNING_KEY') and hasattr(settings, 'SHORT_URL_CREATE_URL'):
-        shortener_url = urlparse(settings.SHORT_URL_CREATE_URL)
-        remote_url = urlparse(long_url)
+        shortener_url = six.moves.urllib.parse.urlparse(settings.SHORT_URL_CREATE_URL)
+        remote_url = six.moves.urllib.parse.urlparse(long_url)
 
         if shortener_url.netloc.lower() != remote_url.netloc.lower():
             signing_key = SigningKey(binascii.unhexlify(settings.SHORT_URL_SIGNING_KEY))
