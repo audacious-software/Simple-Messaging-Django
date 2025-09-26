@@ -1,8 +1,6 @@
 # pylint: disable=line-too-long, no-member
 # -*- coding: utf-8 -*-
 
-from __future__ import unicode_literals, print_function
-
 import base64
 import importlib
 import json

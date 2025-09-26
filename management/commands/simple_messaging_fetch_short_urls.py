@@ -1,12 +1,11 @@
 # pylint: disable=no-member, line-too-long
 
-from __future__ import print_function
-
 import binascii
 import json
 import logging
 
 import requests
+import six
 
 from nacl.signing import SigningKey
 
@@ -47,4 +46,4 @@ class Command(BaseCommand):
             if fetch_request.status_code >= 200 and fetch_request.status_code < 300:
                 response = fetch_request.json()
 
-                print('Response: %s' % json.dumps(response, indent=2))
+                six.print_('Response: %s' % json.dumps(response, indent=2))
