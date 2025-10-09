@@ -5,6 +5,7 @@ import datetime
 import pytz
 
 from django.conf import settings
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
 
@@ -88,6 +89,13 @@ def update_dashboard_signal_value(signal_name): # pylint: disable=too-many-local
         pass
 
     return None
+
+def fetch_dashboard_widget(widget_name):
+    if widget_name == 'simple_messaging_broadcast_message':
+        return render_to_string('dashboard/widgets/simple_messaging_broadcast_message.html')
+
+    return None
+
 
 def dashboard_pages():
     return [{

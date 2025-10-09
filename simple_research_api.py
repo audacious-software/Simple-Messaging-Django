@@ -14,6 +14,7 @@ def dashboard_actions(metadata):
         formatted = phonenumbers.format_number(parsed, phonenumbers.PhoneNumberFormat.E164)
 
         actions.append({
+            'name': 'Send Text Message',
             'url': '%s?identifier=%s' % (reverse('simple_messaging_ui'), formatted),
             'icon': 'forum',
         })

@@ -1,0 +1,13 @@
+{% load static %}
+{% load simple_messaging %}
+{% simple_messaging_broadcast %}
+
+<script>
+    window.dashboadAdditionalModules = ["{% static 'simple_messaging/js/app/dashboard_message_broadcast.js' %}"]
+
+    window.updateSimpleMessagingBroadcastDestinations = function(destinations) {
+        console.log(`destinations: ${destinations}`)
+
+        window.broadcastDestinationsField.value = destinations.join(', ')
+    }
+</script>

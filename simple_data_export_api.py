@@ -10,18 +10,22 @@ import phonenumbers
 import pytz
 
 from django.conf import settings
+from django.db import connection
 
 from simple_data_export.utils import fetch_export_identifier, UnicodeWriter # pylint: disable=import-error
 
 from .models import IncomingMessage, OutgoingMessage
 
-def export_data_sources(params=None):
+def export_data_sources(params=None): # pylint: disable=too-many-branches
     if params is None:
         params = {}
 
     data_sources = []
 
-    incomings = IncomingMessage.objects.distinct('lookup_key')
+    incomings = IncomingMessage.objects.all()
+
+    if connection.vendor != 'sqlite':
+        incomings = IncomingMessage.objects.distinct('lookup_key')
 
     for incoming in incomings:
         if incoming.lookup_key is not None:
@@ -30,13 +34,17 @@ def export_data_sources(params=None):
             if (sender in data_sources) is False:
                 data_sources.append(sender)
 
-    for incoming in IncomingMessage.objects.filter(lookup_key=None):
-        sender = incoming.current_sender()
+    if connection.vendor != 'sqlite':
+        for incoming in IncomingMessage.objects.filter(lookup_key=None):
+            sender = incoming.current_sender()
 
-        if (sender in data_sources) is False:
-            data_sources.append(sender)
+            if (sender in data_sources) is False:
+                data_sources.append(sender)
 
-    outgoings = OutgoingMessage.objects.distinct('lookup_key')
+    outgoings = OutgoingMessage.objects.all()
+
+    if connection.vendor != 'sqlite':
+        outgoings = OutgoingMessage.objects.distinct('lookup_key')
 
     for outgoing in outgoings:
         if outgoing.lookup_key is not None:
@@ -45,11 +53,12 @@ def export_data_sources(params=None):
             if (destination in data_sources) is False:
                 data_sources.append(destination)
 
-    for outgoing in OutgoingMessage.objects.filter(lookup_key=None):
-        destination = outgoing.current_destination()
+    if connection.vendor != 'sqlite':
+        for outgoing in OutgoingMessage.objects.filter(lookup_key=None):
+            destination = outgoing.current_destination()
 
-        if (destination in data_sources) is False:
-            data_sources.append(destination)
+            if (destination in data_sources) is False:
+                data_sources.append(destination)
 
     return data_sources
 
