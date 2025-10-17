@@ -3,6 +3,8 @@
 
 import base64
 import importlib
+import hashlib
+import logging
 import json
 import os
 import traceback
@@ -25,6 +27,8 @@ from django.utils.encoding import smart_str
 
 SIMPLE_MESSAGING_INCOMING_MEDIA_FILE_FOLDER = 'incoming_message_media'
 SIMPLE_MESSAGING_OUTGOING_MEDIA_FILE_FOLDER = 'outgoing_message_media'
+
+logger = logging.getLogger(__name__) # pylint: disable=invalid-name
 
 @register()
 def check_data_export_parameters(app_configs, **kwargs): # pylint: disable=unused-argument
@@ -132,8 +136,67 @@ def encrypt_value(cleartext):
 
     return cleartext
 
+class OutgoingMessagesManager(models.Manager):
+    def messages_to_destination(self, destination, lookup_key=None, as_of=None, since=None, include_unsent=True, **kwargs):
+        found = []
+
+        hash_prefix = ''
+
+        if hasattr(settings, 'SIMPLE_MESSAGING_LOOKUP_HASH_PREFIX'):
+           hash_prefix = settings.SIMPLE_MESSAGING_LOOKUP_HASH_PREFIX
+
+        hash_obj = hashlib.sha256()
+        hash_obj.update(('%s%s' % (hash_prefix, destination)).encode('utf-8'))
+
+        hash_lookup = hash_obj.hexdigest()
+
+        query = Q(lookup_key=None)
+
+        if hash_lookup is not None:
+            query = query | Q(lookup_key=hash_lookup)
+
+        if as_of is not None:
+            query = query & Q(sent_date__lte=as_of)
+
+        if since is not None:
+            if include_unsent:
+                query = query & Q(send_date__gte=since)
+            else:
+                query = query & Q(sent_date__gte=since)
+
+        if len(kwargs) > 0:
+            query = query & Q(**kwargs)
+
+        message_query = OutgoingMessage.objects.filter(query)
+
+        if include_unsent is False:
+            message_query = message_query.exclude(sent_date=None)
+
+        for message in message_query:
+            if message.lookup_key is None:
+                message_destination = message.current_destination()
+
+                if destination == message_destination:
+                    message.lookup_key = hash_lookup
+                    message.save()
+
+                    if message.sent_date is None:
+                        message.sent_date = message.send_date
+
+                    found.append(message)
+
+            elif message.lookup_key == hash_lookup:
+                found.append(message)
+
+                if message.sent_date is None:
+                    message.sent_date = message.send_date
+
+        return sorted(found, key=lambda message: message.sent_date)
+
 @python_2_unicode_compatible
 class OutgoingMessage(models.Model):
+    objects = OutgoingMessagesManager()
+
     destination = models.CharField(max_length=256)
 
     reference_id = models.IntegerField(null=True, blank=True)
@@ -292,6 +355,8 @@ class OutgoingMessage(models.Model):
             except AttributeError:
                 pass
 
+        logger.error('transmitting')
+
         try: # pylint: disable=too-many-nested-blocks
             processed = False
             processed_metadata = {}
@@ -322,6 +387,8 @@ class OutgoingMessage(models.Model):
 
             self.sent_date = timezone.now()
 
+            logger.error('processed_metadata: %s' % processed_metadata)
+
             transmission_metadata.update(processed_metadata)
 
             if processed is False:
@@ -330,7 +397,8 @@ class OutgoingMessage(models.Model):
                 if len(processed_metadata) == 0: # pylint: disable=len-as-condition
                     transmission_metadata['error'] = 'No processor found for message.'
                 else:
-                    transmission_metadata['error'] = 'Error in processing message.'
+                    if ('error' in transmission_metadata) is False:
+                        transmission_metadata['error'] = 'Error in processing message. (0001)'
 
             self.transmission_metadata = json.dumps(transmission_metadata, indent=2)
 
@@ -344,7 +412,8 @@ class OutgoingMessage(models.Model):
             if self.transmission_metadata is not None and self.transmission_metadata.strip() != '':
                 transmission_metadata = json.loads(self.transmission_metadata)
 
-            transmission_metadata['error'] = 'Error in processing message.'
+                if ('error' in transmission_metadata) is False:
+                    transmission_metadata['error'] = 'Error in processing message. (0002)'
 
             transmission_metadata['traceback'] = traceback.format_exc().splitlines()
 
