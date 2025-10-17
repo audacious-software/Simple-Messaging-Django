@@ -166,10 +166,10 @@ class OutgoingMessagesManager(models.Manager): # pylint: disable=too-few-public-
             else:
                 query = query & Q(sent_date__gte=since)
 
-        if len(kwargs) > 0:
+        if len(kwargs) > 0: # pylint: disable=len-as-condition
             query = query & Q(**kwargs)
 
-        message_query = OutgoingMessage.objects.filter(query)
+        message_query = self.filter(query)
 
         if include_unsent is False:
             message_query = message_query.exclude(sent_date=None)
