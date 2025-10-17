@@ -136,14 +136,14 @@ def encrypt_value(cleartext):
 
     return cleartext
 
-class OutgoingMessagesManager(models.Manager):
-    def messages_to_destination(self, destination, lookup_key=None, as_of=None, since=None, include_unsent=True, **kwargs):
+class OutgoingMessagesManager(models.Manager): # pylint: disable=too-few-public-methods
+    def messages_to_destination(self, destination, lookup_key=None, as_of=None, since=None, include_unsent=True, **kwargs): # pylint:disable=too-many-arguments, too-many-branches
         found = []
 
         hash_prefix = ''
 
         if hasattr(settings, 'SIMPLE_MESSAGING_LOOKUP_HASH_PREFIX'):
-           hash_prefix = settings.SIMPLE_MESSAGING_LOOKUP_HASH_PREFIX
+            hash_prefix = settings.SIMPLE_MESSAGING_LOOKUP_HASH_PREFIX
 
         hash_obj = hashlib.sha256()
         hash_obj.update(('%s%s' % (hash_prefix, destination)).encode('utf-8'))
@@ -152,7 +152,9 @@ class OutgoingMessagesManager(models.Manager):
 
         query = Q(lookup_key=None)
 
-        if hash_lookup is not None:
+        if lookup_key is not None:
+            query = query | Q(lookup_key=lookup_key)
+        else:
             query = query | Q(lookup_key=hash_lookup)
 
         if as_of is not None:
@@ -386,8 +388,6 @@ class OutgoingMessage(models.Model):
                 transmission_metadata = json.loads(self.transmission_metadata)
 
             self.sent_date = timezone.now()
-
-            logger.error('processed_metadata: %s' % processed_metadata)
 
             transmission_metadata.update(processed_metadata)
 
