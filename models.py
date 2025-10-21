@@ -137,7 +137,7 @@ def encrypt_value(cleartext):
     return cleartext
 
 class OutgoingMessagesManager(models.Manager): # pylint: disable=too-few-public-methods
-    def messages_to_destination(self, destination, lookup_key=None, as_of=None, since=None, include_unsent=True, **kwargs): # pylint:disable=too-many-arguments, too-many-branches
+    def messages_to_destination(self, destination, lookup_key=None, as_of=None, since=None, include_unsent=True, **kwargs): # pylint:disable=too-many-arguments, too-many-branches, too-many-positional-arguments
         found = []
 
         hash_prefix = ''
