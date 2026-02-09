@@ -357,8 +357,6 @@ class OutgoingMessage(models.Model):
             except AttributeError:
                 pass
 
-        logger.error('transmitting')
-
         try: # pylint: disable=too-many-nested-blocks
             processed = False
             processed_metadata = {}
