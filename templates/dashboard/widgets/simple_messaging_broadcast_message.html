@@ -6,8 +6,6 @@
     window.dashboadAdditionalModules = ["{% static 'simple_messaging/js/app/dashboard_message_broadcast.js' %}"]
 
     window.updateSimpleMessagingBroadcastDestinations = function(destinations) {
-        console.log(`destinations: ${destinations}`)
-
         window.broadcastDestinationsField.value = destinations.join(', ')
     }
 </script>
