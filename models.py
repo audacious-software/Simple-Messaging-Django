@@ -206,7 +206,7 @@ class OutgoingMessage(models.Model):
     send_date = models.DateTimeField()
     sent_date = models.DateTimeField(null=True, blank=True)
 
-    message = models.TextField(max_length=1024)
+    message = models.TextField(max_length=(1024 * 1024))
 
     errored = models.BooleanField(default=False)
 
