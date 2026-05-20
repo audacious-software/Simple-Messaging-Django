@@ -17,6 +17,10 @@ class LineSplittingTestCase(TestCase):
         with open('simple_messaging/testing/test_line_splitting/long_message.txt', encoding='utf-8') as long_message:
             long_message_txt = long_message.read()
 
+            normalized_text = six.ensure_str(long_message_txt, encoding='utf-8')
+
+            self.assertEqual(len(long_message_txt), len(normalized_text))
+
             bundles = split_into_bundles(long_message_txt, bundle_size=640)
 
             self.assertEqual(bundles, [
