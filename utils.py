@@ -150,7 +150,6 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
 
     print('byte_len(original_text) => %s' % byte_len(original_text))
 
-
     bundle_count = math.ceil(float(byte_len(original_text)) / bundle_size)
 
     target_bundle_size = math.ceil(float(byte_len(original_text)) / bundle_count)
