@@ -45,8 +45,6 @@ def split_by_lines(original_text, target_bundle_size, max_bundle_size):
 
     for line in lines:
         if byte_len(line) >= max_bundle_size:
-            print('LINE %s TOO BIG %d - NO LINES' % (line, len(line)))
-
             return None
 
         if current_bundle == '':
@@ -75,7 +73,6 @@ def split_by_sentences(original_text, target_bundle_size, max_bundle_size):
 
     for sentence in sentences:
         if byte_len(sentence) >= max_bundle_size:
-            print('SENTENCE  %s TOO BIG %d - NO SENTENCES' % (sentence, len(sentence)))
             return None
 
         if current_bundle == '':
@@ -142,7 +139,7 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
         if settings.hasattr('SIMPLE_MESSAGING_SPLIT_BUNDLE_SIZE'):
             bundle_size = settings.SIMPLE_MESSAGING_SPLIT_BUNDLE_SIZE
         else:
-            bundle_size = 640
+            bundle_size = 1000
 
     original_text = six.ensure_str(original_text, encoding='utf-8')
 
