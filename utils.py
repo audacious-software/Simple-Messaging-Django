@@ -141,7 +141,7 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
         else:
             bundle_size = 1000
 
-    original_text = six.ensure_str(original_text, encoding='utf-8')
+    original_text = six.ensure_text(original_text, encoding='utf-8')
 
     if byte_len(original_text) <= bundle_size:
         return [original_text]
