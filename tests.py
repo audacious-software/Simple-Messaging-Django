@@ -1,9 +1,13 @@
 # pylint: disable=line-too-long
 
+import six
+
 from django.test import TestCase
 
 from .utils import split_into_bundles
 
+if six.PY2:
+    from io import open
 
 class LineSplittingTestCase(TestCase):
     def setUp(self):
