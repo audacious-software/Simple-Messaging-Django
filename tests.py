@@ -4,7 +4,7 @@ import six
 
 from django.test import TestCase
 
-from .utils import split_into_bundles
+from .utils import split_into_bundles, byte_len
 
 if six.PY2:
     from io import open # pylint: disable=redefined-builtin
@@ -19,7 +19,7 @@ class LineSplittingTestCase(TestCase):
 
             normalized_text = six.ensure_str(long_message_txt, encoding='utf-8')
 
-            self.assertEqual(len(long_message_txt), len(normalized_text))
+            self.assertEqual(byte_len(long_message_txt), byte_len(normalized_text))
 
             bundles = split_into_bundles(long_message_txt, bundle_size=1000)
 
