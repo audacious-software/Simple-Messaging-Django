@@ -1,6 +1,7 @@
 import math
 
 import nltk
+import six
 
 from django.conf import settings
 
@@ -139,6 +140,8 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
             bundle_size = settings.SIMPLE_MESSAGING_SPLIT_BUNDLE_SIZE
         else:
             bundle_size = 640
+
+    original_text = six.ensure_str(original_text, encoding='utf-8')
 
     if len(original_text) <= bundle_size:
         return [original_text]
