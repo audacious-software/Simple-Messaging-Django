@@ -148,9 +148,12 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
     if byte_len(original_text) <= bundle_size:
         return [original_text]
 
-    bundle_count = math.ceil(byte_len(original_text) / bundle_size)
+    print('byte_len(original_text) => %s' % byte_len(original_text))
 
-    target_bundle_size = math.ceil(byte_len(original_text) / bundle_count)
+
+    bundle_count = math.ceil(float(byte_len(original_text)) / bundle_size)
+
+    target_bundle_size = math.ceil(float(byte_len(original_text)) / bundle_count)
 
     original_text = original_text.replace('\r', '\n')
 
