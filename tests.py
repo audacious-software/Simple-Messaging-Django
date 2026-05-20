@@ -7,7 +7,7 @@ from django.test import TestCase
 from .utils import split_into_bundles
 
 if six.PY2:
-    from io import open # pylint: disable
+    from io import open # pylint: disable=redefined-builtin
 
 class LineSplittingTestCase(TestCase):
     def setUp(self):
