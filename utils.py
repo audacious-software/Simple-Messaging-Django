@@ -5,6 +5,9 @@ import six
 
 from django.conf import settings
 
+def byte_len(string_obj):
+    return len(six.ensure_binary(string_obj, encoding='utf-16'))
+
 def split_by_paragraphs(original_text, target_bundle_size, max_bundle_size):
     bundles = []
 
@@ -13,7 +16,7 @@ def split_by_paragraphs(original_text, target_bundle_size, max_bundle_size):
     current_bundle = ''
 
     for paragraph in paragraphs:
-        if len(paragraph) >= max_bundle_size:
+        if byte_len(paragraph) >= max_bundle_size:
             return None
 
         if current_bundle == '':
@@ -21,14 +24,14 @@ def split_by_paragraphs(original_text, target_bundle_size, max_bundle_size):
         else:
             updated_bundle = '%s\n\n%s' % (current_bundle, paragraph.strip())
 
-            if len(updated_bundle) > target_bundle_size:
+            if byte_len(updated_bundle) > target_bundle_size:
                 bundles.append(current_bundle)
 
                 current_bundle = paragraph
             else:
                 current_bundle = updated_bundle
 
-    if len(current_bundle) > 0: # pylint: disable=len-as-condition
+    if byte_len(current_bundle) > 0:
         bundles.append(current_bundle)
 
     return bundles
@@ -41,7 +44,7 @@ def split_by_lines(original_text, target_bundle_size, max_bundle_size):
     current_bundle = ''
 
     for line in lines:
-        if len(line) >= max_bundle_size:
+        if byte_len(line) >= max_bundle_size:
             print('LINE %s TOO BIG %d - NO LINES' % (line, len(line)))
 
             return None
@@ -51,14 +54,14 @@ def split_by_lines(original_text, target_bundle_size, max_bundle_size):
         else:
             updated_bundle = '%s\n%s' % (current_bundle, line.strip())
 
-            if len(updated_bundle) > target_bundle_size:
+            if byte_len(updated_bundle) > target_bundle_size:
                 bundles.append(current_bundle)
 
                 current_bundle = line
             else:
                 current_bundle = updated_bundle
 
-    if len(current_bundle) > 0: # pylint: disable=len-as-condition
+    if byte_len(current_bundle) > 0:
         bundles.append(current_bundle)
 
     return bundles
@@ -71,7 +74,7 @@ def split_by_sentences(original_text, target_bundle_size, max_bundle_size):
     current_bundle = ''
 
     for sentence in sentences:
-        if len(sentence) >= max_bundle_size:
+        if byte_len(sentence) >= max_bundle_size:
             print('SENTENCE  %s TOO BIG %d - NO SENTENCES' % (sentence, len(sentence)))
             return None
 
@@ -80,14 +83,14 @@ def split_by_sentences(original_text, target_bundle_size, max_bundle_size):
         else:
             updated_bundle = '%s %s' % (current_bundle, sentence.strip())
 
-            if len(updated_bundle) > target_bundle_size:
+            if byte_len(updated_bundle) > target_bundle_size:
                 bundles.append(current_bundle)
 
                 current_bundle = sentence
             else:
                 current_bundle = updated_bundle
 
-    if len(current_bundle) > 0: # pylint: disable=len-as-condition
+    if byte_len(current_bundle) > 0:
         bundles.append(current_bundle)
 
     return bundles
@@ -100,7 +103,7 @@ def split_by_space(original_text, target_bundle_size, max_bundle_size):
     current_bundle = ''
 
     for token in tokens:
-        if len(token) >= max_bundle_size:
+        if byte_len(token) >= max_bundle_size:
             return None
 
         if current_bundle == '':
@@ -115,7 +118,7 @@ def split_by_space(original_text, target_bundle_size, max_bundle_size):
             else:
                 current_bundle = updated_bundle
 
-    if len(current_bundle) > 0: # pylint: disable=len-as-condition
+    if byte_len(current_bundle) > 0:
         bundles.append(current_bundle)
 
     return bundles
@@ -143,12 +146,12 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
 
     original_text = six.ensure_str(original_text, encoding='utf-8')
 
-    if len(original_text) <= bundle_size:
+    if byte_len(original_text) <= bundle_size:
         return [original_text]
 
-    bundle_count = math.ceil(len(original_text) / bundle_size)
+    bundle_count = math.ceil(byte_len(original_text) / bundle_size)
 
-    target_bundle_size = math.ceil(len(original_text) / bundle_count)
+    target_bundle_size = math.ceil(byte_len(original_text) / bundle_count)
 
     original_text = original_text.replace('\r', '\n')
 
