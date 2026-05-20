@@ -24,6 +24,8 @@ def split_by_paragraphs(original_text, target_bundle_size, max_bundle_size):
         else:
             updated_bundle = '%s\n\n%s' % (current_bundle, paragraph.strip())
 
+            print('%s -- %d [%d]' % (updated_bundle, byte_len(updated_bundle), target_bundle_size))
+
             if byte_len(updated_bundle) > target_bundle_size:
                 bundles.append(current_bundle)
 
