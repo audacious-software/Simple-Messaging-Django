@@ -24,8 +24,6 @@ def split_by_paragraphs(original_text, target_bundle_size, max_bundle_size):
         else:
             updated_bundle = '%s\n\n%s' % (current_bundle, paragraph.strip())
 
-            print('%s -- %d [%d]' % (updated_bundle, byte_len(updated_bundle), target_bundle_size))
-
             if byte_len(updated_bundle) > target_bundle_size:
                 bundles.append(current_bundle)
 
@@ -147,8 +145,6 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
 
     if byte_len(original_text) <= bundle_size:
         return [original_text]
-
-    print('byte_len(original_text) => %s' % byte_len(original_text))
 
     bundle_count = math.ceil(float(byte_len(original_text)) / bundle_size)
 

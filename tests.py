@@ -27,7 +27,7 @@ class LineSplittingTestCase(TestCase):
                 six.ensure_text("Health Providers I Can Call: \n1. Goodenow - not sure the number - \"\"I sometimes have suicidal thoughts or feelings that I want to die. I've been thinking about getting some professional help. Just so you know, I'm okay right now and not in crisis. I haven't tried any kind of treatment yet, but I was thinking about seeing a therapist. Is that something you can help me with?\"\"", encoding='utf-8'),
                 six.ensure_text("Crisis Resources: \n#1: Warmline (Non-Crisis Support) - NoneFor non-crisis support, warmlines are available. Find your local warmline, or a warmline that accepts out of state calls: https://warmline.org/warmdir.html ", encoding='utf-8'),
                 six.ensure_text("Ways I Can Make My Environment Safer: \n#1: Places to make safer: Home and my car\n#2: The park\n#3: Ways of creating time/space: Asking my wife to hold my meds\n#4: Places I can go: The mall\n#5: Give stuff to my neighbors\n#6: Places to make safer: My room\n#7: Ways of creating time/space: Get rid of my meds\n#8: Places I can go: Starbies\n#9: Other ways to make my environment safer: Ask Nataly to take meds and store them in a locked box she controls.\n", encoding='utf-8')
-              ])
+            ])
 
             normalized_text = six.ensure_text(long_message_txt, encoding='utf-8')
 
