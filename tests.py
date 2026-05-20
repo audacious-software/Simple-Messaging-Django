@@ -19,7 +19,7 @@ class LineSplittingTestCase(TestCase):
 
             normalized_text = six.ensure_str(long_message_txt, encoding='utf-8')
 
-            bundles = split_into_bundles(normalized_text, bundle_size=1000)
+            bundles = split_into_bundles(long_message_txt, bundle_size=1000)
 
             self.assertEqual(bundles, [
                 "Safety Plan:\nWarning Signs: \n#1: Feeling like I don't want to talk to anyone\n#2: Feeling overwhelmingly angry\n#3: Thinking about ways to die\n#4: Being irritated with everything and everyone\n#5: Doomscrolling\n#6: Not responding to texts",
