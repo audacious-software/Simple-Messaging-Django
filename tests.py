@@ -19,8 +19,6 @@ class LineSplittingTestCase(TestCase):
 
             normalized_text = six.ensure_str(long_message_txt, encoding='utf-8')
 
-            self.assertEqual(byte_len(long_message_txt), byte_len(normalized_text))
-
             bundles = split_into_bundles(long_message_txt, bundle_size=1000)
 
             self.assertEqual(bundles, [
@@ -32,3 +30,5 @@ class LineSplittingTestCase(TestCase):
                 "Crisis Resources: \n#1: Warmline (Non-Crisis Support) - NoneFor non-crisis support, warmlines are available. Find your local warmline, or a warmline that accepts out of state calls: https://warmline.org/warmdir.html ",
                 "Ways I Can Make My Environment Safer: \n#1: Places to make safer: Home and my car\n#2: The park\n#3: Ways of creating time/space: Asking my wife to hold my meds\n#4: Places I can go: The mall\n#5: Give stuff to my neighbors\n#6: Places to make safer: My room\n#7: Ways of creating time/space: Get rid of my meds\n#8: Places I can go: Starbies\n#9: Other ways to make my environment safer: Ask Nataly to take meds and store them in a locked box she controls.\n\n"
               ])
+
+            self.assertEqual(byte_len(long_message_txt), byte_len(normalized_text))
