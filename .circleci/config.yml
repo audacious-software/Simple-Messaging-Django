@@ -39,7 +39,7 @@ jobs:
           name: Validate Javascript code
           command: |
             npm install
-            npx eslint static/simple_messaging/js/
+            npx standard static/simple_messaging/js/
       - run:
           name: Build and validate
           command: |
@@ -108,7 +108,7 @@ jobs:
           name: Validate Javascript code
           command: |
             npm install
-            npx eslint static/simple_messaging/js/
+            npx standard static/simple_messaging/js/
       - run:
           name: Build and validate
           command: |
@@ -177,7 +177,7 @@ jobs:
           name: Validate Javascript code
           command: |
             npm install
-            npx eslint static/simple_messaging/js/
+            npx standard static/simple_messaging/js/
       - run:
           name: Build and validate
           command: |
@@ -245,7 +245,7 @@ jobs:
           name: Validate Javascript code
           command: |
             npm install
-            npx eslint static/simple_messaging/js/
+            npx standard static/simple_messaging/js/
       - run:
           name: Build and validate
           command: |
@@ -313,7 +313,7 @@ jobs:
           name: Validate Javascript code
           command: |
             npm install
-            npx eslint static/simple_messaging/js/
+            npx standard static/simple_messaging/js/
       - run:
           name: Build and validate
           command: |
@@ -381,7 +381,7 @@ jobs:
           name: Validate Javascript code
           command: |
             npm install
-            npx eslint static/simple_messaging/js/
+            npx standard static/simple_messaging/js/
       - run:
           name: Build and validate
           command: |
@@ -449,7 +449,7 @@ jobs:
           name: Validate Javascript code
           command: |
             npm install
-            npx eslint static/simple_messaging/js/
+            npx standard static/simple_messaging/js/
       - run:
           name: Build and validate
           command: |
@@ -519,7 +519,7 @@ jobs:
             nvm install 17.9.1
             nvm use 17.9.1
             npm install
-            npx eslint static/simple_messaging/js/
+            npx standard static/simple_messaging/js/
       - run:
           name: Build and validate
           command: |

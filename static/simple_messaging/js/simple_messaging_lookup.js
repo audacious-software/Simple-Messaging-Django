@@ -1,3 +1,5 @@
+/* global $ */
+
 $(document).ready(function () {
   const csrftoken = $('[name=csrfmiddlewaretoken]').val()
 

@@ -1,4 +1,4 @@
-/* global moment, alert, FormData */
+/* global moment, alert, FormData, $ */
 
 $(document).ready(function () {
   const csrftoken = $('[name=csrfmiddlewaretoken]').val()
