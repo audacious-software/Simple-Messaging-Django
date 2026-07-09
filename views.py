@@ -257,14 +257,12 @@ def simple_messaging_send_json(request): # pylint: disable=too-many-locals, too-
         except phonenumbers.NumberParseException:
             pass
 
-        outgoing = OutgoingMessage.objects.create(destination=destination, send_date=timezone.now(), message=message)
-
         transmission_metadata = {
+            'django.user': '%s (%s)' % (request.user, request.user.pk),
             'message_channel': request.POST.get('channel', None)
         }
 
-        outgoing.transmission_metadata = json.dumps(transmission_metadata, indent=2)
-        outgoing.save()
+        outgoing = OutgoingMessage.objects.create(destination=destination, send_date=timezone.now(), message=message, transmission_metadata=json.dumps(transmission_metadata, indent=2))
 
         outgoing.encrypt_message()
         outgoing.encrypt_destination()
@@ -394,7 +392,11 @@ def dashboard_broadcast(request): # pylint: disable=invalid-name
                 if when != '':
                     when_send = pytz.timezone(destination.fetch_tz()).localize(datetime.datetime.strptime(when, '%Y-%m-%dT%H:%M'))
 
-                outgoing = OutgoingMessage.objects.create(destination=destination.fetch_destination(), send_date=when_send, message=message)
+                transmission_metadata = {
+                    'django.user': '%s (%s)' % (request.user, request.user.pk)
+                }
+
+                outgoing = OutgoingMessage.objects.create(destination=destination.fetch_destination(), send_date=when_send, message=message, transmission_metadata=json.dumps(transmission_metadata, indent=2))
                 outgoing.encrypt_destination()
 
                 outgoing_files = []
