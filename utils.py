@@ -136,7 +136,7 @@ def split_by_character(original_text, target_bundle_size, max_bundle_size):
 
 def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-many-return-statements
     if bundle_size is None:
-        if settings.hasattr('SIMPLE_MESSAGING_SPLIT_BUNDLE_SIZE'):
+        if hasattr(settings, 'SIMPLE_MESSAGING_SPLIT_BUNDLE_SIZE'):
             bundle_size = settings.SIMPLE_MESSAGING_SPLIT_BUNDLE_SIZE
         else:
             bundle_size = 1000
