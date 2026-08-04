@@ -20,13 +20,13 @@ $(document).ready(function () {
   const loadMessages = function (messages, loadMore = false, since = 0) {
     const toScroll = []
 
-    let scrollTo = {}
+    const scrollTo = {}
 
     $.each(messages, function (index, message) {
       if (since !== 0 && scrollTo[message.channel] === undefined && message.timestamp > since) {
         scrollTo[message.channel] = message.timestamp
       }
-  
+
       let itemHtml = ''
 
       const formattedTime = moment(message.timestamp * 1000).format('MMMM Do YYYY, h:mm:ss a')
@@ -183,10 +183,10 @@ $(document).ready(function () {
       })
 
       if (scrollTo[channel] !== undefined) {
-        $(`[data-timestamp="${message.timestamp}"]`).each((messageElement) => {
-          console.log(`SINCE SCROLL: ${channel} -- ${message.timestamp} -- ${messageElement.position().top}`)
-          
-          $(element).scrollTop(messageElement.position().top)
+        $(`[data-timestamp="${scrollTo[channel]}"]`).each((messageElement) => {
+          $('#message_box_' + channel).each(function (index, element) {
+            $(element).scrollTop(messageElement.position().top)
+          })
         })
       } else {
         $('#message_box_' + channel).each(function (index, element) {
