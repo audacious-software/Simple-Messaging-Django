@@ -122,7 +122,7 @@ def dashboard_pages():
 
     if can_do_unknown_messages:
         pages.append({
-           'title': 'Unknown Messages',
+            'title': 'Unknown Messages',
             'icon': 'sms',
             'url': reverse('dashboard_unknown_messages_log'),
         })
