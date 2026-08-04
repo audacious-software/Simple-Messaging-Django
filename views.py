@@ -44,6 +44,7 @@ def incoming_message_request(request):
 def simple_messaging_ui(request): # pylint:disable=too-many-branches, too-many-statements
     context = {
         'identifier': request.GET.get('identifier', ''),
+        'when': request.GET.get('when', '0'),
         'media_enabled': True,
     }
 
@@ -185,6 +186,7 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
                 'media_urls': media_urls,
                 'message_id': message.pk,
                 'error': False,
+                'ui_details': [],
             })
 
     for message in OutgoingMessage.objects.filter(sent_date__gt=start_time):
@@ -198,6 +200,7 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
                 'media_urls': message.media_urls(),
                 'message_id': message.pk,
                 'error': message.errored,
+                'ui_details': [],
             })
 
     for app in settings.INSTALLED_APPS:
@@ -349,7 +352,93 @@ def dashboard_messages_log(request):
     limit = int(request.GET.get('limit', '25'))
     query = request.GET.get('q', None)
 
-    messages = fetch_messages(query=query)
+    messages = fetch_messages(query=query, request=request)
+
+    if query is None:
+        query = ''
+
+    total = len(messages)
+
+    context['messages'] = messages[offset:(offset + limit)]
+    context['start'] = offset + 1
+    context['end'] = min(len(messages), (offset + limit))
+    context['total'] = total
+
+    if (offset - limit) >= 0:
+        context['previous'] = '%s?offset=%s&limit=%s&q=%s' % (reverse('dashboard_messages_log'), offset - limit, limit, query)
+
+    if (offset + limit) < total:
+        context['next'] = '%s?offset=%s&limit=%s&q=%s' % (reverse('dashboard_messages_log'), offset + limit, limit, query)
+
+    context['first'] = '%s?offset=0&limit=%s&q=%s' % (reverse('dashboard_messages_log'), limit, query)
+
+    last = int(total / limit) * limit
+
+    context['last'] = '%s?offset=%s&limit=%s&q=%s' % (reverse('dashboard_messages_log'), last, limit, query)
+
+    return render(request, 'dashboard/dashboard_messages_log.html', context=context)
+
+@staff_member_required
+def dashboard_unknown_messages_log(request):
+    context = {
+        'include_search': True
+    }
+
+    offset = int(request.GET.get('offset', '0'))
+    limit = int(request.GET.get('limit', '25'))
+    query = request.GET.get('q', None)
+
+    parties = []
+
+    for app in settings.INSTALLED_APPS:
+        try:
+            messaging_module = importlib.import_module('.simple_messaging_api', package=app)
+
+            for party in messaging_module.fetch_parties():
+                if (party in parties) is False:
+                    parties.append(party)
+        except ImportError:
+            pass
+        except AttributeError:
+            pass
+
+    messages = fetch_messages(query=query, exclude_parties=parties, request=request)
+
+    if query is None:
+        query = ''
+
+    total = len(messages)
+
+    context['messages'] = messages[offset:(offset + limit)]
+    context['start'] = offset + 1
+    context['end'] = min(len(messages), (offset + limit))
+    context['total'] = total
+
+    if (offset - limit) >= 0:
+        context['previous'] = '%s?offset=%s&limit=%s&q=%s' % (reverse('dashboard_messages_log'), offset - limit, limit, query)
+
+    if (offset + limit) < total:
+        context['next'] = '%s?offset=%s&limit=%s&q=%s' % (reverse('dashboard_messages_log'), offset + limit, limit, query)
+
+    context['first'] = '%s?offset=0&limit=%s&q=%s' % (reverse('dashboard_messages_log'), limit, query)
+
+    last = int(total / limit) * limit
+
+    context['last'] = '%s?offset=%s&limit=%s&q=%s' % (reverse('dashboard_messages_log'), last, limit, query)
+
+    return render(request, 'dashboard/dashboard_messages_log.html', context=context)
+
+@staff_member_required
+def dashboard_upcoming_messages_log(request):
+    context = {
+        'include_search': True
+    }
+
+    offset = int(request.GET.get('offset', '0'))
+    limit = int(request.GET.get('limit', '25'))
+    query = request.GET.get('q', None)
+
+    messages = fetch_messages(query=query, upcoming=True, request=request)
 
     if query is None:
         query = ''

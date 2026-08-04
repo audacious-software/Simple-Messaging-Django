@@ -557,10 +557,13 @@ class BlockedSender(models.Model):
     def __str__(self):
         return '%s' % self.sender
 
-def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False): # pylint: disable=too-many-arguments, unused-argument
+def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False, exclude_parties=None, upcoming=False, request=None): # pylint: disable=too-many-arguments, unused-argument, too-many-locals, too-many-branches, too-many-statements
+    if exclude_parties is None:
+        exclude_parties = []
+
     messages = []
 
-    if direction in (None, 'incoming'):
+    if upcoming is False and direction in (None, 'incoming'):
         sort = '-receive_date'
 
         if order == 'ascending':
@@ -568,14 +571,23 @@ def fetch_messages(direction=None, query=None, destination=None, order='descendi
 
         message_query = Q(pk__gte=0)
 
+        if query is not None:
+            search_query = Q(message__icontains=query)
+            search_query = search_query | Q(sender__icontains=query)
+
+            message_query = message_query & search_query
+
         for incoming in IncomingMessage.objects.filter(message_query).order_by(sort):
-            messages.append({
-                'direction': 'incoming',
-                'sender': incoming.current_sender(),
-                'destination': incoming.recipient,
-                'when': incoming.receive_date,
-                'message': incoming.message
-            })
+            party = incoming.current_sender()
+
+            if (party in exclude_parties) is False:
+                messages.append({
+                    'direction': 'incoming',
+                    'sender': party,
+                    'destination': incoming.recipient,
+                    'when': incoming.receive_date,
+                    'message': incoming.message
+                })
 
     if direction in (None, 'outgoing'):
         sort = '-sent_date'
@@ -585,14 +597,46 @@ def fetch_messages(direction=None, query=None, destination=None, order='descendi
 
         message_query = Q(pk__gte=0)
 
+        if query is not None:
+            search_query = Q(message__icontains=query)
+            search_query = search_query | Q(destination__icontains=query)
+
+            message_query = message_query & search_query
+
+        if upcoming is False:
+            message_query = message_query & ~Q(sent_date=None)
+        else:
+            message_query = message_query & Q(sent_date=None)
+
         for outgoing in OutgoingMessage.objects.filter(message_query).order_by(sort):
-            messages.append({
-                'direction': 'outgoing',
-                'sender': 'system',
-                'destination': outgoing.current_destination(),
-                'when': outgoing.sent_date,
-                'message': outgoing.message
-            })
+            party = outgoing.current_destination()
+
+            if (party in exclude_parties) is False:
+                message = {
+                    'direction': 'outgoing',
+                    'sender': 'system',
+                    'destination': outgoing.current_destination(),
+                    'when': outgoing.sent_date,
+                    'message': outgoing.message
+                }
+
+                if upcoming:
+                    message['when'] = outgoing.send_date
+                    message['upcoming'] = True
+                    message['url'] = 'admin:simple_messaging_outgoingmessage_change'
+                    message['pk'] = outgoing.pk
+
+                messages.append(message)
+
+    for app in settings.INSTALLED_APPS:
+        try:
+            message_module = importlib.import_module('.simple_messaging_api', package=app)
+
+            message_module.annotate_view_messages(messages, request=request)
+        except ImportError:
+            pass
+        except AttributeError:
+            pass
 
     reverse_sort = True
 
@@ -600,7 +644,7 @@ def fetch_messages(direction=None, query=None, destination=None, order='descendi
         reverse_sort = False
 
     if query is not None:
-        messages = list(filter(lambda msg: query in '|'.join([str(value) for value in msg.values()]), messages)) # pylint: disable=deprecated-lambda
+        messages = list(filter(lambda msg: query.lower() in '|'.join([str(value).lower() for value in msg.values()]), messages)) # pylint: disable=deprecated-lambda
 
     messages.sort(key=lambda item: item['when'], reverse=reverse_sort)
 

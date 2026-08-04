@@ -1,6 +1,7 @@
 # pylint: disable=line-too-long, no-member, len-as-condition, import-outside-toplevel
 
 import datetime
+import importlib
 
 import pytz
 
@@ -98,12 +99,44 @@ def fetch_dashboard_widget(widget_name):
 
 
 def dashboard_pages():
-    return [{
+    pages = [{
         'title': 'Messages Log',
         'icon': 'forum',
         'url': reverse('dashboard_messages_log'),
-    }, {
+    }]
+
+    can_do_unknown_messages = False
+
+    for app in settings.INSTALLED_APPS:
+        if can_do_unknown_messages is False:
+            try:
+                messaging_module = importlib.import_module('.simple_messaging_api', package=app)
+
+                messaging_module.fetch_parties()
+
+                can_do_unknown_messages = True
+            except ImportError:
+                pass
+            except AttributeError:
+                pass
+
+    if can_do_unknown_messages:
+        pages.append({
+           'title': 'Unknown Messages',
+            'icon': 'sms',
+            'url': reverse('dashboard_unknown_messages_log'),
+        })
+
+    pages.append({
+        'title': 'Scheduled Messages',
+        'icon': 'calendar_month',
+        'url': reverse('dashboard_upcoming_messages_log'),
+    })
+
+    pages.append({
         'title': 'Phone Lookup',
         'icon': 'travel_explore',
         'url': reverse('dashboard_lookup'),
-    }]
+    })
+
+    return pages

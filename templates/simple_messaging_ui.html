@@ -85,6 +85,8 @@
 		<audio id="outgoing_earcon" src="{% static 'simple_messaging/earcons/outgoing.mp3' %}" hidden></audio>
     </body>
     <script>
+		window.startMessagesAt = {{ when }}
+
 		{% if identifier %}
 			window.lastPhone = "{{ identifier }}"
 		{% else %}

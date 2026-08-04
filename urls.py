@@ -9,7 +9,8 @@ else:
 
 from .views import incoming_message_request, simple_messaging_ui, simple_messaging_messages_json, \
                    simple_messaging_send_json, simple_messaging_lookup, simple_messaging_lookup_json, \
-                   dashboard_messages_log, dashboard_broadcast, dashboard_lookup
+                   dashboard_messages_log, dashboard_broadcast, dashboard_lookup, \
+                   dashboard_unknown_messages_log, dashboard_upcoming_messages_log
 
 urlpatterns = [
     url(r'^incoming$', incoming_message_request, name='incoming_message'),
@@ -21,5 +22,7 @@ urlpatterns = [
     url(r'^lookup.json$', simple_messaging_lookup_json, name='simple_messaging_lookup_json'),
     url(r'^dashboard/lookup$', dashboard_lookup, name='dashboard_lookup'),
     url(r'^dashboard/messages$', dashboard_messages_log, name='dashboard_messages_log'),
+    url(r'^dashboard/messages/unknown$', dashboard_unknown_messages_log, name='dashboard_unknown_messages_log'),
+    url(r'^dashboard/messages/upcoming$', dashboard_upcoming_messages_log, name='dashboard_upcoming_messages_log'),
     url(r'^dashboard/messages/broadcast.json$', dashboard_broadcast, name='dashboard_broadcast'),
 ]

@@ -10,12 +10,12 @@
 			<div class="mdc-layout-grid__cell mdc-layout-grid__cell--span-12">
 				<div class="mdc-data-table" id="messages_table" style="width: 100%;">
 					<div class="mdc-data-table__table-container">
-						<table class="mdc-data-table__table" aria-label="Message Log">
+						<table class="mdc-data-table__table" aria-label="Message Log" style="width: 100%;">
 							<thead>
 								<tr class="mdc-data-table__header-row">
-									<th class="mdc-data-table__header-cell" role="columnheader" scope="col">Date</th>
-									<th class="mdc-data-table__header-cell" role="columnheader" scope="col">Sender</th>
-									<th class="mdc-data-table__header-cell" role="columnheader" scope="col">Destination</th>
+									<th class="mdc-data-table__header-cell" role="columnheader" scope="col" style="width: 250px;">Date</th>
+									<th class="mdc-data-table__header-cell" role="columnheader" scope="col" style="width: 150px;">Sender</th>
+									<th class="mdc-data-table__header-cell" role="columnheader" scope="col" style="width: 150px;">Destination</th>
 									<th class="mdc-data-table__header-cell" role="columnheader" scope="col">Message</th>
 								</tr>
 							</thead>
@@ -23,9 +23,38 @@
 								{% for message in messages %}
 									<tr class="mdc-data-table__row">
 										<td class="mdc-data-table__cell" scope="row">{{ message.when }}</td>
-										<td class="mdc-data-table__cell">{{ message.sender }}</td>
-										<td class="mdc-data-table__cell">{{ message.destination }}</td>
-										<td class="mdc-data-table__cell">{{ message.message }}</td>
+										<td class="mdc-data-table__cell">
+											{% if message.direction == 'incoming' %}
+												{% if message.sender_name %}
+													{{ message.sender_name }}<br />
+												{% endif %}
+												<a href="{% url 'simple_messaging_ui' %}?identifier={{ message.sender }}&when={{ message.when.timestamp }}">{{ message.sender }}</a>
+											{% else %}
+												{% if message.sender_name %}
+													{{ message.sender_name }}<br />
+												{% endif %}
+												{{ message.sender }}
+											{% endif %}
+										</td>
+										<td class="mdc-data-table__cell">
+											{% if message.direction == 'outgoing' %}
+												{% if message.destination_name %}
+													{{ message.destination_name }}<br />
+												{% endif %}
+												<a href="{% url 'simple_messaging_ui' %}?identifier={{ message.destination }}&when={{ message.when.timestamp }}">{{ message.destination }}</a>
+											{% else %}
+												{% if message.destination_name %}
+													{{ message.destination_name }}<br />
+												{% endif %}
+												{{ message.destination }}
+											{% endif %}
+										</td>
+										<td class="mdc-data-table__cell" style="white-space: normal; padding-top: 0.5em; padding-bottom: 0.5em;">
+											{{ message.message|linebreaksbr }}
+											{% if message.upcoming %}
+												<a href="{% url message.url message.pk %}"><i class="material-icons" style="font-size: 18px; float: right;">edit</i></a>
+											{% endif %}
+										</td>
 									</tr>
 								{% endfor %}
 							</tbody>

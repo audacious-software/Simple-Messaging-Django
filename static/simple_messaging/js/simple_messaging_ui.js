@@ -17,10 +17,16 @@ $(document).ready(function () {
 
   const cachedMessages = {}
 
-  const loadMessages = function (messages, loadMore = false) {
+  const loadMessages = function (messages, loadMore = false, since = 0) {
     const toScroll = []
 
+    let scrollTo = {}
+
     $.each(messages, function (index, message) {
+      if (since !== 0 && scrollTo[message.channel] === undefined && message.timestamp > since) {
+        scrollTo[message.channel] = message.timestamp
+      }
+  
       let itemHtml = ''
 
       const formattedTime = moment(message.timestamp * 1000).format('MMMM Do YYYY, h:mm:ss a')
@@ -55,7 +61,18 @@ $(document).ready(function () {
           }
         })
 
-        itemHtml += '          <small>' + formattedTime + ' ' + errorIcon + '</small>'
+        let details = ''
+
+        $.each(message.ui_details, function (index, detailObj) {
+          details += `&bull; ${detailObj.label}: ${detailObj.value}`
+        })
+
+        if (details === '') {
+          itemHtml += '          <small>' + formattedTime + ' ' + errorIcon + '</small>'
+        } else {
+          itemHtml += '          <small>' + formattedTime + ' ' + details + ' ' + errorIcon + '</small>'
+        }
+
         itemHtml += '        </div>'
         itemHtml += '      </div>'
         itemHtml += '    </div>'
@@ -95,7 +112,18 @@ $(document).ready(function () {
           }
         })
 
-        itemHtml += '          <small>' + formattedTime + ' ' + errorIcon + '</small>'
+        let details = ''
+
+        $.each(message.ui_details, function (index, detailObj) {
+          details += `&bull; ${detailObj.label}: ${detailObj.value}`
+        })
+
+        if (details === '') {
+          itemHtml += '          <small>' + formattedTime + ' ' + errorIcon + '</small>'
+        } else {
+          itemHtml += '          <small>' + formattedTime + ' ' + details + ' ' + errorIcon + '</small>'
+        }
+
         itemHtml += '        </div>'
         itemHtml += '      </div>'
         itemHtml += '    </div>'
@@ -154,9 +182,17 @@ $(document).ready(function () {
         messageBox.append(this)
       })
 
-      $('#message_box_' + channel).each(function (index, element) {
-        $(element).scrollTop(element.scrollHeight)
-      })
+      if (scrollTo[channel] !== undefined) {
+        $(`[data-timestamp="${message.timestamp}"]`).each((messageElement) => {
+          console.log(`SINCE SCROLL: ${channel} -- ${message.timestamp} -- ${messageElement.position().top}`)
+          
+          $(element).scrollTop(messageElement.position().top)
+        })
+      } else {
+        $('#message_box_' + channel).each(function (index, element) {
+          $(element).scrollTop(element.scrollHeight)
+        })
+      }
     })
   }
 
@@ -177,9 +213,13 @@ $(document).ready(function () {
     } else {
       const now = Date.now() / 1000
 
-      const windowStart = now - (2 * 7 * 24 * 60 * 60) // Two weeks
+      if (since === 0) {
+        const windowStart = now - (2 * 7 * 24 * 60 * 60) // Two weeks
 
-      payload.since = windowStart
+        payload.since = windowStart
+      } else {
+        payload.since = since
+      }
 
       loadMore = true
     }
@@ -209,7 +249,7 @@ $(document).ready(function () {
         return a.timestamp - b.timestamp
       })
 
-      loadMessages(toLoad, loadMore)
+      loadMessages(toLoad, loadMore, since)
 
       success()
     })
@@ -217,7 +257,7 @@ $(document).ready(function () {
 
   const refreshIDs = []
 
-  const refresh = function () {
+  const refresh = function (start = 0) {
     if (window.lastPhone.length >= 0) {
       fetchMessages(window.lastPhone, function () {
         while (refreshIDs.length > 0) {
@@ -227,7 +267,7 @@ $(document).ready(function () {
         }
 
         refreshIDs.push(window.setTimeout(refresh, 5000))
-      })
+      }, start)
     }
   }
 
@@ -270,7 +310,7 @@ $(document).ready(function () {
       if (cachedMessages[phone] !== undefined) {
         loadMessages(cachedMessages[phone])
       } else {
-        refresh()
+        refresh(window.startMessagesAt)
       }
 
       window.lastPhone = phone
