@@ -557,7 +557,7 @@ class BlockedSender(models.Model):
     def __str__(self):
         return '%s' % self.sender
 
-def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False, exclude_parties=None, upcoming=False, request=None): # pylint: disable=too-many-arguments, unused-argument, too-many-locals, too-many-branches, too-many-statements
+def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False, exclude_parties=None, upcoming=False, request=None): # pylint: disable=too-many-arguments, unused-argument, too-many-locals, too-many-branches, too-many-statements, too-many-positional-arguments
     if exclude_parties is None:
         exclude_parties = []
 
