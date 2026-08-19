@@ -1,4 +1,4 @@
-# pylint: disable=line-too-long
+# pylint: disable=line-too-long, no-member
 
 import binascii
 import json
@@ -79,7 +79,7 @@ def shorten_url(long_url, tracking_code=None, metadata=None): # pylint: disable=
 
     return None
 
-def simple_messaging_precomposed_messages():
+def simple_messaging_precomposed_messages(): # pylint: disable=invalid-name
     messages = []
 
     for message in PrecomposedMessage.objects.filter(enabled=True).order_by('label'):

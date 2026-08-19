@@ -686,7 +686,7 @@ def fetch_destination_proxy(identifier):
 
 @python_2_unicode_compatible
 class PrecomposedMessage(models.Model):
-    message = models.TextField(max_length=(1024 * 1024))
+    message = models.TextField(max_length=(1024 * 1024)) # pylint: disable=superfluous-parens
     label = models.CharField(max_length=256)
 
     enabled = models.BooleanField(default=True)
