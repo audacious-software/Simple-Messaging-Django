@@ -31,7 +31,8 @@ def dashboard_actions(metadata):
 def dashboard_additional_columns(obj=None):
     if obj is None:
         return [{
-            'name': 'Unread'
+            'name': 'Unread',
+            'style': 'text-align: center;',
         }]
 
     column_values = []
@@ -68,11 +69,19 @@ def dashboard_additional_columns(obj=None):
                 except AttributeError:
                     pass
 
-            column_values.append({
-                'display': '%s' % unread_count,
-                'action': '%s?identifier=%s&when=%s' % (reverse('simple_messaging_ui'), formatted, when),
-                'align': 'center',
-            })
+            if unread_count > 0:
+                column_values.append({
+                    'display': '%s' % unread_count,
+                    'action': '%s?identifier=%s&when=%s' % (reverse('simple_messaging_ui'), formatted, when),
+                    'style': 'color: #fff; font-weight: bold; padding: 4px; border-radius: 4px; background-color: #800;',
+                    'column_style': 'text-align: center;'
+                })
+            else:
+                column_values.append({
+                    'display': '%s' % unread_count,
+                    'action': '%s?identifier=%s&when=%s' % (reverse('simple_messaging_ui'), formatted, when),
+                    'column_style': 'text-align: center;'
+                })
         except phonenumbers.NumberParseException:
             column_values.append({
                 'display': '',

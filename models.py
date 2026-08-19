@@ -683,3 +683,13 @@ def fetch_destination_proxy(identifier):
         proxy = DestinationProxy(identifier=identifier, destination=identifier)
 
     return proxy
+
+@python_2_unicode_compatible
+class PrecomposedMessage(models.Model):
+    message = models.TextField(max_length=(1024 * 1024))
+    label = models.CharField(max_length=256)
+
+    enabled = models.BooleanField(default=True)
+
+    def __str__(self):
+        return '%s: %s' % (self.label, self.message)

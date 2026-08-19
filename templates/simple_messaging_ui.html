@@ -62,16 +62,18 @@
 								<button class="btn btn-outline-secondary material-icons" id="upload_button" type="button">backup</button>
 								<input type="file" id="attachment" class="d-none">
 							{% endif %}
-							{% if precomposed %}
-								<button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">TXT</button>
-								<ul class="dropdown-menu">
+							<button class="btn btn-outline-secondary material-icons" id="send_button" type="button">send</button>
+						</div>
+						{% if precomposed %}
+							<div class="input-group dropup mt-1">
+								<button class="btn btn-outline-secondary dropdown-toggle w-100 material-icons" type="button" data-bs-toggle="dropdown" aria-expanded="false">menu_book</button>
+								<ul class="dropdown-menu dropdown-menu-end">
 									{% for message in precomposed %}
 										<li><a class="dropdown-item precomposed-message" href="#" data-message="{{ message.1 }}">{{ message.0 }}</a></li>
 									{% endfor %}
 								</ul>
-							{% endif %}
-							<button class="btn btn-outline-secondary material-icons" id="send_button" type="button">send</button>
-						</div>
+							</div>
+						{% endif %}
 						<div class="mt-2">
 							<small>
 								<strong id="character_count">(Count Here)</strong>

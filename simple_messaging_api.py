@@ -10,6 +10,8 @@ from nacl.signing import SigningKey
 
 from django.conf import settings
 
+from .models import PrecomposedMessage
+
 def fetch_short_url_metadata(outgoing_message):
     return {
         'simple_messaging.OutgoingMessage': '%s:%s' % (settings.ALLOWED_HOSTS[0], outgoing_message.pk,)
@@ -76,3 +78,11 @@ def shorten_url(long_url, tracking_code=None, metadata=None): # pylint: disable=
                 return short_url
 
     return None
+
+def simple_messaging_precomposed_messages():
+    messages = []
+
+    for message in PrecomposedMessage.objects.filter(enabled=True).order_by('label'):
+        messages.append((message.label, message.message))
+
+    return messages

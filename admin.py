@@ -7,7 +7,7 @@ from django.conf import settings
 from django.contrib import admin
 from django.utils import timezone
 
-from .models import OutgoingMessage, OutgoingMessageMedia, IncomingMessage, IncomingMessageMedia, BlockedSender
+from .models import OutgoingMessage, OutgoingMessageMedia, IncomingMessage, IncomingMessageMedia, BlockedSender, PrecomposedMessage
 
 def reset_resend_messages(modeladmin, request, queryset): # pylint: disable=unused-argument
     for message in queryset:
@@ -143,3 +143,9 @@ class BlockedSenderAdmin(admin.ModelAdmin):
     list_display = ('sender', 'blocked')
     search_fields = ('sender', 'notes',)
     list_filter = ('blocked',)
+
+@admin.register(PrecomposedMessage)
+class PrecomposedMessageAdmin(admin.ModelAdmin):
+    list_display = ('label', 'enabled', 'message')
+    search_fields = ('message', 'label',)
+    list_filter = ('enabled',)
