@@ -27,7 +27,7 @@ def evaluate_launch_keyword_context(sender, context):
 
             messages = OutgoingMessage.models.messages_to_destination(destination, since=since, include_unsent=False)
 
-            if len(messages) > 0:
+            if len(messages) > 0: # pylint: disable=len-as-condition
                 return False
 
             return True
