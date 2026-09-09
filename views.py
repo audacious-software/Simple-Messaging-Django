@@ -52,6 +52,22 @@ def simple_messaging_ui(request): # pylint:disable=too-many-branches, too-many-s
 
     channels = []
 
+    all_labels = []
+
+    for message in IncomingMessage.objects.exclude(labels=None).exclude(labels=''):
+        for label in message.fetch_labels():
+            if (label in all_labels) is False:
+                all_labels.append(label)
+
+    for message in OutgoingMessage.objects.exclude(labels=None).exclude(labels=''):
+        for label in message.fetch_labels():
+            if (label in all_labels) is False:
+                all_labels.append(label)
+
+    all_labels.sort()
+
+    context['labels'] = all_labels
+
     for app in settings.INSTALLED_APPS:
         try:
             response_module = importlib.import_module('.simple_messaging_api', package=app)
@@ -138,6 +154,47 @@ def simple_messaging_ui(request): # pylint:disable=too-many-branches, too-many-s
 
     return render(request, 'simple_messaging_ui.html', context)
 
+
+@staff_member_required
+def simple_messaging_add_label_json(request):
+    if request.method == 'POST':
+        message_id = request.POST.get('message_id', None)
+        label = request.POST.get('label', None)
+
+        if (None in (message_id, label)) is False:
+            id_tokens = message_id.split(':')
+
+            if len(id_tokens) == 2:
+                updated = False
+
+                if id_tokens[0] == 'in':
+                    for message in IncomingMessage.objects.filter(pk=int(id_tokens[1])):
+                        message.add_label(label)
+
+                        updated = True
+
+                elif id_tokens[0] == 'out':
+                    for message in OutgoingMessage.objects.filter(pk=int(id_tokens[1])):
+                        message.add_label(label)
+
+                        updated = True
+
+                if updated:
+                    response = {
+                        'success': True,
+                        'message': 'Label added to specified message.'
+                    }
+
+                    return HttpResponse(json.dumps(response, indent=2), content_type='application/json', status=200)
+
+    response = {
+        'success': False,
+        'error': 'Invalid payload'
+    }
+
+    return HttpResponse(json.dumps(response, indent=2), content_type='application/json', status=500)
+
+
 @staff_member_required
 def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
     messages = []
@@ -185,6 +242,7 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
                 'timestamp': arrow.get(message.receive_date).float_timestamp,
                 'media_urls': media_urls,
                 'message_id': message.pk,
+                'labels': message.fetch_labels(),
                 'error': False,
                 'ui_details': [],
             })
@@ -199,6 +257,7 @@ def simple_messaging_messages_json(request): # pylint: disable=too-many-branches
                 'timestamp': arrow.get(message.sent_date).float_timestamp,
                 'media_urls': message.media_urls(),
                 'message_id': message.pk,
+                'labels': message.fetch_labels(),
                 'error': message.errored,
                 'ui_details': [],
             })

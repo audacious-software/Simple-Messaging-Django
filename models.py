@@ -215,6 +215,8 @@ class OutgoingMessage(models.Model):
 
     lookup_key = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
 
+    labels = models.TextField(max_length=(1024 * 1024), null=True, blank=True)
+
     def __str__(self):
         send_date = self.send_date.astimezone(pytz.timezone(settings.TIME_ZONE))
         message = self.message
@@ -223,6 +225,35 @@ class OutgoingMessage(models.Model):
             message = '%s%s' % (message[:64], '...')
 
         return '%s (PK: %d, %s)' % (message, self.pk, send_date.strftime('%c'))
+
+    def fetch_labels(self):
+        if self.labels is None or self.labels.strip() == '':
+            return []
+
+        return self.labels.split('|')
+
+    def add_label(self, label):
+        if label is None or label.strip() == '':
+            return
+
+        existing = self.fetch_labels()
+
+        if (label in existing) is False:
+            existing.append(label)
+
+            self.labels = '|'.join(existing)
+
+            self.save()
+
+    def clear_label(self, label):
+        existing = self.fetch_labels()
+
+        if (label in existing) is False:
+            existing.remove(label)
+
+            self.labels = '|'.join(existing)
+
+            self.save()
 
     def fetch_message(self, metadata=None, skip_url_metadata=False): # pylint: disable=dangerous-default-value, too-many-branches
         tokens = self.current_message().split(' ')
@@ -451,6 +482,8 @@ class IncomingMessage(models.Model):
 
     lookup_key = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
 
+    labels = models.TextField(max_length=(1024 * 1024), null=True, blank=True)
+
     def __str__(self):
         receive_date = self.receive_date.astimezone(pytz.timezone(settings.TIME_ZONE))
         message = self.message
@@ -459,6 +492,36 @@ class IncomingMessage(models.Model):
             message = '%s%s' % (message[:64], '...')
 
         return '%s (PK: %d, %s)' % (message, self.pk, receive_date.strftime('%c'))
+
+    def fetch_labels(self):
+        if self.labels is None or self.labels.strip() == '':
+            return []
+
+        return self.labels.split('|')
+
+    def add_label(self, label):
+        if label is None or label.strip() == '':
+            return
+
+        existing = self.fetch_labels()
+
+        if (label in existing) is False:
+            existing.append(label)
+
+            self.labels = '|'.join(existing)
+
+            self.save()
+
+    def clear_label(self, label):
+        existing = self.fetch_labels()
+
+        if (label in existing) is False:
+            existing.remove(label)
+
+            self.labels = '|'.join(existing)
+
+            self.save()
+
 
     def current_message(self):
         if self.message is not None and self.message.startswith('secret:'):

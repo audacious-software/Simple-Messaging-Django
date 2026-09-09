@@ -15,7 +15,18 @@ $(document).ready(function () {
     }
   })
 
+  const createLabel = function(label, messageId) {
+    let labelHtml = `<span class="badge border border-white mb-1 d-inline-flex align-items-center ms-1">`
+    labelHtml +=    `  <span class="">${label}</span>`
+    labelHtml +=    `  <a class="material-icons text-decoration-none text-white align-text-top" style="font-size: 14px;" href="#" data-message-id="${messageId}" data-label="${label}">close</a>`
+    labelHtml +=    `</span>`
+
+    return labelHtml
+  }
+
   const cachedMessages = {}
+
+  const addLabelModal = new bootstrap.Modal('#add_label_modal', {})  
 
   const loadMessages = function (messages, loadMore = false, since = 0) {
     const toScroll = []
@@ -67,11 +78,23 @@ $(document).ready(function () {
           details += `&bull; ${detailObj.label}: ${detailObj.value}`
         })
 
+        itemHtml += '          <div class="d-flex justify-content-between align-baseline small">'
+
         if (details === '') {
-          itemHtml += '          <small>' + formattedTime + ' ' + errorIcon + '</small>'
+          itemHtml += '<div>' + formattedTime + ' ' + errorIcon + '</div>'
         } else {
-          itemHtml += '          <small>' + formattedTime + ' ' + details + ' ' + errorIcon + '</small>'
+          itemHtml += '<div>' + formattedTime + ' ' + details + ' ' + errorIcon + '</div>'
         }
+
+        itemHtml += '<div class="text-end" style="max-width: 33%;"><span class="message_labels">'
+
+        for (const labelValue of message.labels) {
+          itemHtml += createLabel(labelValue, 'out:' + message.message_id) + ' '
+        }
+        
+        itemHtml +=  '</span><div class="d-inline-block ms-1 mb-1" style="height: 24px;"><a style="font-size: 14px;" class="material-icons text-decoration-none text-white tag_message" href="#" data-message-id="in:' + message.message_id + '">sell</a></div></div>'
+
+        itemHtml += '          </div>'
 
         itemHtml += '        </div>'
         itemHtml += '      </div>'
@@ -118,12 +141,23 @@ $(document).ready(function () {
           details += `&bull; ${detailObj.label}: ${detailObj.value}`
         })
 
+        itemHtml += '          <div class="d-flex justify-content-between align-baseline small">'
+
         if (details === '') {
-          itemHtml += '          <small>' + formattedTime + ' ' + errorIcon + '</small>'
+          itemHtml += '<div>' + formattedTime + ' ' + errorIcon + '</div>'
         } else {
-          itemHtml += '          <small>' + formattedTime + ' ' + details + ' ' + errorIcon + '</small>'
+          itemHtml += '<div>' + formattedTime + ' ' + details + ' ' + errorIcon + '</div>'
         }
 
+        itemHtml += '<div class="text-end" style="max-width: 33%;"><span class="message_labels">'
+
+        for (const labelValue of message.labels) {
+          itemHtml += createLabel(labelValue, 'out:' + message.message_id) + ' '
+        }
+        
+        itemHtml +=  '</span><div class="d-inline-block ms-1 mb-1" style="height: 24px;"><a style="font-size: 14px;" class="material-icons text-decoration-none text-white tag_message" href="#" data-message-id="out:' + message.message_id + '">sell</a></div></div>'
+
+        itemHtml += '          </div>'
         itemHtml += '        </div>'
         itemHtml += '      </div>'
         itemHtml += '    </div>'
@@ -183,17 +217,65 @@ $(document).ready(function () {
       })
 
       if (scrollTo[channel] !== undefined) {
-        $(`[data-timestamp="${scrollTo[channel]}"]`).each((messageElement) => {
+        $(`[data-timestamp="${scrollTo[channel]}"]`).each((msgIndex, messageElement) => {
           $('#message_box_' + channel).each(function (index, element) {
-            $(element).scrollTop(messageElement.position().top)
+            $(element).scrollTop($(messageElement).position.top)
           })
         })
       } else {
         $('#message_box_' + channel).each(function (index, element) {
-          $(element).scrollTop(element.scrollHeight)
+          $(element).scrollTop($(element).scrollHeight)
         })
       }
     })
+
+    $('.tag_message').off('click')
+
+    $('.tag_message').click(function (eventObj) {
+      eventObj.preventDefault()
+
+      const messageId = $(eventObj.target).attr('data-message-id')
+
+      const linkParent = $(eventObj.target).parent()
+
+      $('#button_add_label').off('click')
+
+      $('#button_add_label').click(function (eventObj) {
+        const labelValue = $('#add_label_field').val()
+
+        const payload = {
+          'message_id': messageId,
+          'label': labelValue
+        }
+
+        $.post('add-label.json', payload, function (data) {
+          if (data.success) {
+            linkParent.find('.message_labels').each(function(index) {
+              if ($(this).html().length === 0) {
+                $(this).append(createLabel(labelValue, messageId))
+              } else {
+                $(this).append(' &bull; ' + createLabel(labelValue, messageId))
+              }
+            })
+
+            const newOption = `<option value="${labelValue}">`
+
+            if ($('#label_options').html().includes(newOption) === false) {
+              $('#label_options').append(newOption);
+            }
+          } else {
+            alert(`Unable to add label to message: ${data.error}`)
+          }
+
+          addLabelModal.hide()
+        })
+      })
+
+      $('#add_label_field').val('')
+
+      addLabelModal.show()
+    })
+
   }
 
   const fetchMessages = function (phone, success, since = 0) {
