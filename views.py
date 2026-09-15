@@ -411,7 +411,7 @@ def dashboard_messages_log(request):
     limit = int(request.GET.get('limit', '25'))
     query = request.GET.get('q', None)
 
-    messages = fetch_messages(query=query, request=request)
+    messages = fetch_messages(query=query, request=request, context='message-log')
 
     if query is None:
         query = ''
@@ -461,7 +461,7 @@ def dashboard_unknown_messages_log(request):
         except AttributeError:
             pass
 
-    messages = fetch_messages(query=query, exclude_parties=parties, request=request)
+    messages = fetch_messages(query=query, exclude_parties=parties, request=request, context='unknown-message-log')
 
     if query is None:
         query = ''
@@ -497,7 +497,7 @@ def dashboard_upcoming_messages_log(request):
     limit = int(request.GET.get('limit', '25'))
     query = request.GET.get('q', None)
 
-    messages = fetch_messages(query=query, upcoming=True, request=request)
+    messages = fetch_messages(query=query, upcoming=True, request=request, context='upcoming-message-log')
 
     if query is None:
         query = ''
