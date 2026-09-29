@@ -1,9 +1,11 @@
 import math
 import re
 
-import emoji
 import nltk
 import six
+
+if six.PY2 is False:
+    import emoji
 
 from django.conf import settings
 
@@ -194,9 +196,12 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
     return [original_text]
 
 def extract_reactions(message):
-    cleaned_text = emoji.replace_emoji(message, replace='|EMOJI|')
-
     reactions = []
+
+    if six.PY2:
+        return reactions
+
+    cleaned_text = emoji.replace_emoji(message, replace='|EMOJI|')
 
     for pattern in ADD_EMOJI_REACT_PATTERNS:
         if re.match(pattern, cleaned_text):
