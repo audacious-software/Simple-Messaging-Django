@@ -1,3 +1,4 @@
+# pylint: disable=no-member
 # coding: utf-8
 
 import math
