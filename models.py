@@ -215,6 +215,8 @@ class OutgoingMessage(models.Model):
 
     lookup_key = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
 
+    labels = models.TextField(max_length=(1024 * 1024), null=True, blank=True)
+
     def add_reactions(self, reactions, when, message_identifier=None):
         metadata = {}
 
@@ -249,6 +251,35 @@ class OutgoingMessage(models.Model):
             message = '%s%s' % (message[:64], '...')
 
         return '%s (PK: %d, %s)' % (message, self.pk, send_date.strftime('%c'))
+
+    def fetch_labels(self):
+        if self.labels is None or self.labels.strip() == '':
+            return []
+
+        return self.labels.split('|')
+
+    def add_label(self, label):
+        if label is None or label.strip() == '':
+            return
+
+        existing = self.fetch_labels()
+
+        if (label in existing) is False:
+            existing.append(label)
+
+            self.labels = '|'.join(existing)
+
+            self.save()
+
+    def clear_label(self, label):
+        existing = self.fetch_labels()
+
+        if (label in existing) is False:
+            existing.remove(label)
+
+            self.labels = '|'.join(existing)
+
+            self.save()
 
     def fetch_message(self, metadata=None, skip_url_metadata=False): # pylint: disable=dangerous-default-value, too-many-branches
         tokens = self.current_message().split(' ')
@@ -477,6 +508,8 @@ class IncomingMessage(models.Model):
 
     lookup_key = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
 
+    labels = models.TextField(max_length=(1024 * 1024), null=True, blank=True)
+
     def __str__(self):
         receive_date = self.receive_date.astimezone(pytz.timezone(settings.TIME_ZONE))
         message = self.message
@@ -485,6 +518,36 @@ class IncomingMessage(models.Model):
             message = '%s%s' % (message[:64], '...')
 
         return '%s (PK: %d, %s)' % (message, self.pk, receive_date.strftime('%c'))
+
+    def fetch_labels(self):
+        if self.labels is None or self.labels.strip() == '':
+            return []
+
+        return self.labels.split('|')
+
+    def add_label(self, label):
+        if label is None or label.strip() == '':
+            return
+
+        existing = self.fetch_labels()
+
+        if (label in existing) is False:
+            existing.append(label)
+
+            self.labels = '|'.join(existing)
+
+            self.save()
+
+    def clear_label(self, label):
+        existing = self.fetch_labels()
+
+        if (label in existing) is False:
+            existing.remove(label)
+
+            self.labels = '|'.join(existing)
+
+            self.save()
+
 
     def current_message(self):
         if self.message is not None and self.message.startswith('secret:'):
@@ -583,7 +646,7 @@ class BlockedSender(models.Model):
     def __str__(self):
         return '%s' % self.sender
 
-def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False, exclude_parties=None, upcoming=False, request=None): # pylint: disable=too-many-arguments, unused-argument, too-many-locals, too-many-branches, too-many-statements, too-many-positional-arguments
+def fetch_messages(direction=None, query=None, destination=None, order='descending', pending=False, exclude_parties=None, upcoming=False, request=None, context=None): # pylint: disable=too-many-arguments, unused-argument, too-many-locals, too-many-branches, too-many-statements, too-many-positional-arguments
     if exclude_parties is None:
         exclude_parties = []
 
@@ -612,7 +675,7 @@ def fetch_messages(direction=None, query=None, destination=None, order='descendi
                     'sender': party,
                     'destination': incoming.recipient,
                     'when': incoming.receive_date,
-                    'message': incoming.message
+                    'message': incoming.current_message()
                 })
 
     if direction in (None, 'outgoing'):
@@ -643,7 +706,7 @@ def fetch_messages(direction=None, query=None, destination=None, order='descendi
                     'sender': 'system',
                     'destination': outgoing.current_destination(),
                     'when': outgoing.sent_date,
-                    'message': outgoing.message
+                    'message': outgoing.current_message()
                 }
 
                 if upcoming:
@@ -658,7 +721,7 @@ def fetch_messages(direction=None, query=None, destination=None, order='descendi
         try:
             message_module = importlib.import_module('.simple_messaging_api', package=app)
 
-            message_module.annotate_view_messages(messages, request=request)
+            message_module.annotate_view_messages(messages, request=request, context=context)
         except ImportError:
             pass
         except AttributeError:
