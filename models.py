@@ -196,7 +196,7 @@ class OutgoingMessagesManager(models.Manager): # pylint: disable=too-few-public-
         return sorted(found, key=lambda message: message.sent_date)
 
 @python_2_unicode_compatible
-class OutgoingMessage(models.Model):
+class OutgoingMessage(models.Model): # pylint: disable=too-many-instance-attributes
     objects = OutgoingMessagesManager()
 
     destination = models.CharField(max_length=256)
