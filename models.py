@@ -215,6 +215,32 @@ class OutgoingMessage(models.Model):
 
     lookup_key = models.CharField(max_length=1024, null=True, blank=True, db_index=True)
 
+    def add_reactions(self, reactions, when, message_identifier=None):
+        metadata = {}
+
+        if (self.message_metadata in ('', None)) is False:
+            try:
+                metadata = json.loads(self.message_metadata)
+            except json.JSONDecodeError:
+                pass
+            except json.UnicodeDecodeError:
+                pass
+
+        reactions = metadata.get('reactions', {})
+
+        if message_identifier is None:
+            message_identifier = when.isoformat()
+
+        reactions[message_identifier] = {
+            'reactions': reactions,
+            'when': when.isoformat()
+        }
+
+        metadata['reactions'] = reactions
+
+        self.message_metadata = json.dumps(metadata, indent=2)
+        self.save()
+
     def __str__(self):
         send_date = self.send_date.astimezone(pytz.timezone(settings.TIME_ZONE))
         message = self.message

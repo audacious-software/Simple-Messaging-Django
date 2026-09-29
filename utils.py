@@ -1,9 +1,20 @@
 import math
+import re
 
+import emoji
 import nltk
 import six
 
 from django.conf import settings
+
+ADD_EMOJI_REACT_PATTERNS = (
+    '^Reacted |EMOJI| to “.*”$',
+    '^|EMOJI| to “.*”$',
+)
+
+REMOVE_EMOJI_REACT_PATTERNS = (
+    '^Removed |EMOJI| from “.*”$',
+)
 
 def byte_len(string_obj):
     return len(six.ensure_binary(string_obj, encoding='utf-16'))
@@ -181,3 +192,25 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
         return character_bundles
 
     return [original_text]
+
+def extract_reactions(message):
+    cleaned_text = emoji.replace_emoji(message, replace='|EMOJI|')
+
+    reactions = []
+
+    for pattern in ADD_EMOJI_REACT_PATTERNS:
+        if re.match(pattern, cleaned_text):
+            for token in emoji.analyze(message):
+                if (token.value.emoji in reactions) is False:
+                    reactions.append(token.value.emoji)
+
+    for pattern in REMOVE_EMOJI_REACT_PATTERNS:
+        if re.match(pattern, cleaned_text):
+            for token in emoji.analyze(message):
+                if (token.value.emoji in reactions) is False:
+                    reactions.append('-%s' % token.value.emoji)
+
+    if re.match('^Reacted with a sticker to “.*”$', cleaned_text):
+        reactions.append('iOS sticker')
+
+    return reactions
