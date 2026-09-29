@@ -4,9 +4,6 @@ import re
 import nltk
 import six
 
-if six.PY2 is False:
-    import emoji
-
 from django.conf import settings
 
 ADD_EMOJI_REACT_PATTERNS = (
@@ -200,6 +197,8 @@ def extract_reactions(message):
 
     if six.PY2:
         return reactions
+
+    import emoji # pylint: disable=import-outside-toplevel
 
     cleaned_text = emoji.replace_emoji(message, replace='|EMOJI|')
 
