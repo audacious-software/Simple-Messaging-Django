@@ -53,7 +53,7 @@ def check_media_upload_protected(app_configs, **kwargs): # pylint: disable=unuse
     try:
         response = requests.get(http_url, timeout=300)
 
-        if (response.status_code >= 200 and response.status_code < 400) and len(response.text) > 0: # pylint: disable=len-as-condition
+        if (200 <= response.status_code < 400) and len(response.text) > 0: # pylint: disable=len-as-condition
             error = Error('Incoming media folder is readable over HTTP', hint='Update webserver configuration to deny read access (' + http_url + ') via HTTP(S).', obj=None, id='simple_messaging.E002')
 
             errors.append(error)
@@ -67,7 +67,7 @@ def check_media_upload_protected(app_configs, **kwargs): # pylint: disable=unuse
     try:
         response = requests.get(http_url, timeout=300)
 
-        if (response.status_code >= 200 and response.status_code < 400) and len(response.text) > 0: # pylint: disable=len-as-condition
+        if (200 <= response.status_code < 400) and len(response.text) > 0: # pylint: disable=len-as-condition
             error = Error('Outgoing media folder is readable over HTTP', hint='Update webserver configuration to deny read access (' + http_url + ') via HTTP(S).', obj=None, id='simple_messaging.E002')
 
             errors.append(error)

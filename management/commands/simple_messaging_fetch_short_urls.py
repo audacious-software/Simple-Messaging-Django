@@ -43,7 +43,7 @@ class Command(BaseCommand):
 
             fetch_request = requests.post(settings.SHORT_URL_FETCH_URL, data=payload, timeout=120)
 
-            if fetch_request.status_code >= 200 and fetch_request.status_code < 300:
+            if 200 <= fetch_request.status_code < 300:
                 response = fetch_request.json()
 
                 six.print_('Response: %s' % json.dumps(response, indent=2))

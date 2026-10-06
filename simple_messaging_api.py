@@ -45,7 +45,7 @@ def shorten_url(long_url, tracking_code=None, metadata=None): # pylint: disable=
 
             fetch_request = requests.post(settings.SHORT_URL_CREATE_URL, data=payload, timeout=120)
 
-            if fetch_request.status_code >= 200 and fetch_request.status_code < 300:
+            if 200 <= fetch_request.status_code < 300:
                 short_url = fetch_request.json()['short_url']
 
                 if metadata is not None:
@@ -66,7 +66,7 @@ def shorten_url(long_url, tracking_code=None, metadata=None): # pylint: disable=
 
             fetch_request = requests.post(fetch_url, headers=headers, json=post_data, timeout=120)
 
-            if fetch_request.status_code >= 200 and fetch_request.status_code < 300:
+            if 200 <= fetch_request.status_code < 300:
                 short_url = fetch_request.json()['link']
 
                 if metadata is not None:
