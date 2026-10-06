@@ -16,7 +16,7 @@ from simple_data_export.utils import fetch_export_identifier, UnicodeWriter # py
 
 from .models import IncomingMessage, OutgoingMessage
 
-def export_data_sources(params=None, requester=None): # pylint: disable=too-many-branches
+def export_data_sources(params=None, requester=None): # pylint: disable=too-many-branches, unused-argument
     if params is None:
         params = {}
 
@@ -62,7 +62,7 @@ def export_data_sources(params=None, requester=None): # pylint: disable=too-many
 
     return data_sources
 
-def export_data_types(available_sources):
+def export_data_types(available_sources): # pylint: disable=unused-argument
     return [
         ('simple_messaging.conversation_transcripts', 'Conversation Transcripts',),
     ]
