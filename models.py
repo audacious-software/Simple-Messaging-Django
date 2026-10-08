@@ -548,7 +548,6 @@ class IncomingMessage(models.Model):
 
             self.save()
 
-
     def current_message(self):
         if self.message is not None and self.message.startswith('secret:'):
             return decrypt_value(self.message)
