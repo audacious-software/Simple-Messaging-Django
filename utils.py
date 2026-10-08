@@ -1,4 +1,4 @@
-# pylint: disable=no-member
+# pylint: disable=no-member, len-as-condition
 # coding: utf-8
 
 import math
