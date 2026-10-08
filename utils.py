@@ -211,13 +211,34 @@ def extract_reactions(message):
                 if (token.value.emoji in reactions) is False:
                     reactions.append(token.value.emoji)
 
-    for pattern in REMOVE_EMOJI_REACT_PATTERNS:
-        if re.match(pattern, cleaned_text):
-            for token in emoji.analyze(message):
-                if (token.value.emoji in reactions) is False:
-                    reactions.append('-%s' % token.value.emoji)
+    if len(reactions) == 0:
+        for pattern in REMOVE_EMOJI_REACT_PATTERNS:
+            if re.match(pattern, cleaned_text):
+                for token in emoji.analyze(message):
+                    if (token.value.emoji in reactions) is False:
+                        reactions.append('-%s' % token.value.emoji)
 
-    if re.match('^Reacted with a sticker to “.*”$', cleaned_text):
-        reactions.append('iOS sticker')
+    if len(reactions) == 0:
+        if re.match('^Reacted with a sticker to “.*”$', cleaned_text):
+            reactions.append('iOS sticker')
+
+    if len(reactions) == 0:
+        if re.match('^Liked “.*”$', cleaned_text):
+            reactions.append('like')
+
+        if re.match('^Disliked “.*”$', cleaned_text):
+            reactions.append('dislike')
+
+        if re.match('^Emphasized “.*”$', cleaned_text):
+            reactions.append('emphasis')
+
+        if re.match('^Loved “.*”$', cleaned_text):
+            reactions.append('love')
+
+    if len(reactions) == 0:
+        if re.match('^Removed a .* from “', cleaned_text):
+            reaction_tokens = cleaned_text.replace('Removed a ', '').split(' from ')
+
+            reactions.append(reaction_tokens[0].strip())
 
     return reactions
