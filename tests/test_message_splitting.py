@@ -4,7 +4,7 @@ import six
 
 from django.test import TestCase
 
-from .utils import split_into_bundles, byte_len
+from ..utils import split_into_bundles, byte_len
 
 if six.PY2:
     from io import open # pylint: disable=redefined-builtin
