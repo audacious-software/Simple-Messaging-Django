@@ -195,7 +195,7 @@ def split_into_bundles(original_text, bundle_size=None): # pylint: disable=too-m
 
     return [original_text]
 
-def extract_reactions(message):
+def extract_reactions(message): # pylint: disable=too-many-branches
     reactions = []
 
     if six.PY2:
