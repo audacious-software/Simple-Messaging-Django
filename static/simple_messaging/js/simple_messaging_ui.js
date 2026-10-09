@@ -217,13 +217,13 @@ $(document).ready(function () {
       })
 
       if (scrollTo[channel] !== undefined) {
-        $(`[data-timestamp="${scrollTo[channel]}"]`).each((msgIndex, messageElement) => {
-          $('#message_box_' + channel).each(function (index, element) {
-            $(element).scrollTop($(messageElement).position.top)
+        $(`[data-timestamp="${scrollTo[channel]}"]`).each((index, element) => {
+          $('#message_box_' + channel).each((index, element) => {
+            $(element).scrollTop($(element).position.top)
           })
         })
       } else {
-        $('#message_box_' + channel).each(function (index, element) {
+        $('#message_box_' + channel).each((index, element) => {
           $(element).scrollTop($(element).scrollHeight)
         })
       }
