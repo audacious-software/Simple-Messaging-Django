@@ -99,13 +99,15 @@ def check_media_upload_available(app_configs, **kwargs): # pylint: disable=unuse
     return errors
 
 @register()
-def check_messaging_key(app_configs, **kwargs): # pylint: disable=unused-argument
+def check_messaging_key_default(app_configs, **kwargs): # pylint: disable=unused-argument
     errors = []
 
     if hasattr(settings, 'SIMPLE_MESSAGING_SECRET_KEY') is False:
         error = Warning('SIMPLE_MESSAGING_SECRET_KEY parameter not defined', hint='Update configuration to include SIMPLE_MESSAGING_SECRET_KEY.', obj=None, id='simple_messaging.W002')
         errors.append(error)
-
+    elif settings.SIMPLE_MESSAGING_SECRET_KEY in ('CHANGEME', ''):
+        error = Warning('SIMPLE_MESSAGING_SECRET_KEY parameter set to a default value: "%s"' % settings.SIMPLE_MESSAGING_SECRET_KEY, hint='Update configuration to include SIMPLE_MESSAGING_SECRET_KEY.', obj=None, id='simple_messaging.W003')
+        errors.append(error)
     return errors
 
 def decrypt_value(stored_text):
