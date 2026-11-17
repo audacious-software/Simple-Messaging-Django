@@ -330,7 +330,7 @@ class OutgoingMessage(models.Model): # pylint: disable=too-many-instance-attribu
                                 pass
                             except AttributeError:
                                 pass
-                            except: pylint: disable=bare-except
+                            except: # pylint: disable=bare-except
                                 traceback.print_exc()
 
                     if short_url is not None:
